@@ -5,15 +5,16 @@ import:
 pipelines:
   build:
     - task: build:clean
-    - task: terraform:docs
-      depends_on: build:clean
+    # - task: terraform:docs
+    #   depends_on: build:clean
     # - task: docs:docbook
     #   depends_on: terraform:docs
     # - task: docs:markdown
     #   depends_on: docs:docbook
     - task: build:copy
       # depends_on: docs:markdown
-      depends_on: terraform:docs
+      # depends_on: terraform:docs
+      depends_on: build:clean
     - task: build:package
       depends_on: build:copy
 
