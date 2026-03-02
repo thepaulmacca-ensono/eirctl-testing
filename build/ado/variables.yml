@@ -16,7 +16,3 @@ variables:
 
   - name: pool_vm_image
     value: ubuntu-24.04
-
-  # Terraform
-  - name: TF_FILE_LOCATION
-    value: /eirctl/src

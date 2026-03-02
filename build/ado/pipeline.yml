@@ -67,6 +67,8 @@ stages:
               targetType: inline
               script: |
                 eirctl lint:terraform:format
+            env:
+              TF_FILE_LOCATION: "/eirctl/src"
 
   - ${{ if eq(parameters.generate_docs, true) }}:
       - stage: docs
@@ -120,6 +122,8 @@ stages:
               targetType: inline
               script: |
                 eirctl tests
+            env:
+              TF_FILE_LOCATION: "/eirctl/src"
 
       - job: create_package
         displayName: Create Package
@@ -140,7 +144,7 @@ stages:
               script: |
                 eirctl build
             env:
-              BUILD_REPOSITORY_NAME: $(Build.Repository.Name)
+              REPOSITORY: $(Build.Repository.Name)
               BUILDNUMBER: $(Build.BuildNumber)
 
           - task: PublishBuildArtifacts@1
@@ -206,7 +210,7 @@ stages:
               PUBLISH_RELEASE: "true"
               GITHUB_TOKEN: $(GITHUB_TOKEN)
               OWNER: thepaulmacca-ensono
-              BUILD_REPOSITORY_NAME: $(Build.Repository.Name)
+              REPOSITORY: $(Build.Repository.Name)
               BUILD_BUILDNUMBER: $(Build.BuildNumber)
               COMMIT_ID: $(Build.SourceVersion)
               ARTIFACTS_DIR: /eirctl/outputs/assets

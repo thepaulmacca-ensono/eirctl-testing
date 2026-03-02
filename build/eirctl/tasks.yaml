@@ -105,11 +105,13 @@ tasks:
     context: powershell
     description: Create the zip package for the Terraform module
     command: |
-      Compress-Archive -Path outputs/module/* -DestinationPath outputs/${env:BUILD_REPOSITORY_NAME}-${env:BUILD_BUILDNUMBER}.zip -Force
+      Compress-Archive -Path outputs/module/* -DestinationPath outputs/${env:REPOSITORY}-${env:BUILD_BUILDNUMBER}.zip -Force
 
+  # GitHub
+  ## Release
   github:release:
     context: powershell
     description: Publish a Release to GitHub
     command:
-      - Write-Host "Publish-GitHubRelease -version $env:BUILD_BUILDNUMBER -commitId $env:COMMIT_ID -apikey $env:GITHUB_TOKEN -artifactsDir $env:ARTIFACTS_DIR -Owner $env:OWNER -repository $env:BUILD_REPOSITORY_NAME"
-      - Publish-GitHubRelease -version $env:BUILD_BUILDNUMBER -commitId $env:COMMIT_ID -apikey $env:GITHUB_TOKEN -artifactsDir $env:ARTIFACTS_DIR -Owner $env:OWNER -repository $env:BUILD_REPOSITORY_NAME
+      - Write-Host "Publish-GitHubRelease -version $env:BUILD_BUILDNUMBER -commitId $env:COMMIT_ID -apikey $env:GITHUB_TOKEN -artifactsDir $env:ARTIFACTS_DIR -Owner $env:OWNER -repository $env:REPOSITORY"
+      - Publish-GitHubRelease -version $env:BUILD_BUILDNUMBER -commitId $env:COMMIT_ID -apikey $env:GITHUB_TOKEN -artifactsDir $env:ARTIFACTS_DIR -Owner $env:OWNER -repository $env:REPOSITORY
