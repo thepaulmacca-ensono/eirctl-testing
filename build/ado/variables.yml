@@ -13,6 +13,9 @@ variables:
   # Eirctl https://github.com/Ensono/eirctl/releases
   - name: eirctl_version
     value: 0.9.11
+  # Tenv
+  - name: TENV_AUTO_INSTALL
+    value: true
 
   - name: pool_vm_image
     value: ubuntu-24.04
