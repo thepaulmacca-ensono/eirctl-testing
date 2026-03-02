@@ -150,8 +150,9 @@ stages:
           - task: PublishBuildArtifacts@1
             displayName: Publish Package
             inputs:
-              pathToPublish: $(Build.SourcesDirectory)/outputs/$(Build.Repository.Name)-$(Build.BuildNumber).zip
+              pathToPublish: $(Build.SourcesDirectory)/outputs
               artifactName: package
+              publishLocation: Container
 
           # - task: PublishBuildArtifacts@1
           #   displayName: Publish README file
@@ -187,12 +188,14 @@ stages:
             displayName: Download Package Artifact
             inputs:
               artifact: package
+              patterns: "**/*.zip"
               path: $(Build.SourcesDirectory)/outputs/assets
 
           # - task: DownloadPipelineArtifact@2
           #   displayName: Download README Artifact
           #   inputs:
           #     artifact: readme
+          #     patterns: "**/*.md"
           #     path: $(Build.SourcesDirectory)/outputs/assets
 
           - template: templates/setup.yml

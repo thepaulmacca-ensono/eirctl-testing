@@ -105,7 +105,8 @@ tasks:
     context: powershell
     description: Create the zip package for the Terraform module
     command: |
-      Compress-Archive -Path outputs/module/* -DestinationPath outputs/${env:REPOSITORY}-${env:BUILD_BUILDNUMBER}.zip -Force
+      $repo_name = ($env:REPOSITORY -split '/')[-1]
+      Compress-Archive -Path outputs/module/* -DestinationPath outputs/${repo_name}-${env:BUILD_BUILDNUMBER}.zip -Force
 
   # GitHub
   ## Release
