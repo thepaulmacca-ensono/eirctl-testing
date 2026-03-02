@@ -68,7 +68,7 @@ stages:
               script: |
                 eirctl lint:terraform:format
 
-  ${{ if eq(parameters.generate_docs, true) }}:
+  - ${{ if eq(parameters.generate_docs, true) }}:
     - stage: docs
       displayName: Documentation
       dependsOn:
@@ -159,7 +159,7 @@ stages:
     displayName: Release to GitHub
     dependsOn:
       - build
-      ${{ if eq(parameters.generate_docs, true) }}:
+      - ${{ if eq(parameters.generate_docs, true) }}:
         - docs
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq('${{ parameters.pre_release }}', 'true')))
     variables:
@@ -171,7 +171,7 @@ stages:
           - checkout: self
             fetchDepth: 1
 
-          ${{ if eq(parameters.generate_docs, true) }}:
+          - ${{ if eq(parameters.generate_docs, true) }}:
             - task: DownloadPipelineArtifact@2
               displayName: Download Documentation Artifact
               inputs:
