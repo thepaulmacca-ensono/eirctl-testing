@@ -69,35 +69,35 @@ stages:
                 eirctl lint:terraform:format
 
   - ${{ if eq(parameters.generate_docs, true) }}:
-    - stage: docs
-      displayName: Documentation
-      dependsOn:
-        - prelim
-      jobs:
-        - job: generate_docs
-          displayName: Generate Documentation
-          steps:
-            - checkout: self
-              fetchDepth: 1
+      - stage: docs
+        displayName: Documentation
+        dependsOn:
+          - prelim
+        jobs:
+          - job: generate_docs
+            displayName: Generate Documentation
+            steps:
+              - checkout: self
+                fetchDepth: 1
 
-            - template: templates/setup.yml
-              parameters:
-                eirctl_version: $(eirctl_version)
+              - template: templates/setup.yml
+                parameters:
+                  eirctl_version: $(eirctl_version)
 
-            - task: Bash@3
-              displayName: Generate Documentation
-              inputs:
-                targetType: inline
-                script: |
-                  eirctl docs
-              env:
-                BUILDNUMBER: $(Build.BuildNumber)
+              - task: Bash@3
+                displayName: Generate Documentation
+                inputs:
+                  targetType: inline
+                  script: |
+                    eirctl docs
+                env:
+                  BUILDNUMBER: $(Build.BuildNumber)
 
-            - task: PublishBuildArtifacts@1
-              displayName: Publish Documentation
-              inputs:
-                pathToPublish: $(Build.SourcesDirectory)/outputs/docs
-                artifactName: docs
+              - task: PublishBuildArtifacts@1
+                displayName: Publish Documentation
+                inputs:
+                  pathToPublish: $(Build.SourcesDirectory)/outputs/docs
+                  artifactName: docs
 
   - stage: build
     displayName: Build Module
@@ -160,7 +160,7 @@ stages:
     dependsOn:
       - build
       - ${{ if eq(parameters.generate_docs, true) }}:
-        - docs
+          - docs
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq('${{ parameters.pre_release }}', 'true')))
     variables:
       - group: github-creds
@@ -172,12 +172,12 @@ stages:
             fetchDepth: 1
 
           - ${{ if eq(parameters.generate_docs, true) }}:
-            - task: DownloadPipelineArtifact@2
-              displayName: Download Documentation Artifact
-              inputs:
-                artifact: docs
-                patterns: "**/*.pdf"
-                path: $(Build.SourcesDirectory)/outputs/assets
+              - task: DownloadPipelineArtifact@2
+                displayName: Download Documentation Artifact
+                inputs:
+                  artifact: docs
+                  patterns: "**/*.pdf"
+                  path: $(Build.SourcesDirectory)/outputs/assets
 
           - task: DownloadPipelineArtifact@2
             displayName: Download Package Artifact
