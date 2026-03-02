@@ -119,5 +119,5 @@ tasks:
     description: Publish a Release to GitHub
     command: |
       $repo_name = ($env:REPOSITORY -split '/')[-1]
-      Write-Host "Publish-GitHubRelease -version $env:BUILD_BUILDNUMBER -commitId $env:COMMIT_ID -apikey $env:GITHUB_TOKEN -artifactsDir $env:ARTIFACTS_DIR -Owner $env:OWNER -repository $repo_name -generateReleaseNotes true"
-      Publish-GitHubRelease -version $env:BUILD_BUILDNUMBER -commitId $env:COMMIT_ID -apikey $env:GITHUB_TOKEN -artifactsDir $env:ARTIFACTS_DIR -Owner $env:OWNER -repository $repo_name -generateReleaseNotes true
+      Write-Host "Publish-GitHubRelease -version $env:BUILD_BUILDNUMBER -commitId $env:COMMIT_ID -apikey *** -artifactsDir $env:ARTIFACTS_DIR -Owner $env:OWNER -repository $repo_name -generateReleaseNotes `$true"
+      Publish-GitHubRelease -version $env:BUILD_BUILDNUMBER -commitId $env:COMMIT_ID -apikey $env:GITHUB_TOKEN -artifactsDir $env:ARTIFACTS_DIR -Owner $env:OWNER -repository $repo_name -generateReleaseNotes $true
