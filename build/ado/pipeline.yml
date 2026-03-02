@@ -1,0 +1,214 @@
+name: "0.0$(Rev:.r)"
+
+parameters:
+  - name: pre_release
+    displayName: Create a Pre-Release from a Feature Branch?
+    type: boolean
+    default: false
+
+  - name: generate_docs
+    type: boolean
+    default: false
+    displayName: Generate Documentation?
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - src/*
+
+pr:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - src/*
+
+pool:
+  vmImage: $(pool_vm_image)
+
+variables:
+  - template: variables.yml
+
+stages:
+  - stage: prelim
+    displayName: Preliminaries
+    jobs:
+      - job: version_number
+        displayName: Set Build Number
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          - template: templates/setup.yml
+            parameters:
+              eirctl_version: $(eirctl_version)
+
+          - task: Bash@3
+            displayName: Set Build Number
+            inputs:
+              targetType: inline
+              script: |
+                eirctl ado:build:number
+
+          - task: Bash@3
+            displayName: Perform YAML Linting
+            inputs:
+              targetType: inline
+              script: |
+                eirctl lint:yaml
+
+          - task: Bash@3
+            displayName: Perform Terraform Format Check
+            inputs:
+              targetType: inline
+              script: |
+                eirctl lint:terraform:format
+
+  ${{ if eq(parameters.generate_docs, true) }}:
+    - stage: docs
+      displayName: Documentation
+      dependsOn:
+        - prelim
+      jobs:
+        - job: generate_docs
+          displayName: Generate Documentation
+          steps:
+            - checkout: self
+              fetchDepth: 1
+
+            - template: templates/setup.yml
+              parameters:
+                eirctl_version: $(eirctl_version)
+
+            - task: Bash@3
+              displayName: Generate Documentation
+              inputs:
+                targetType: inline
+                script: |
+                  eirctl docs
+              env:
+                BUILDNUMBER: $(Build.BuildNumber)
+
+            - task: PublishBuildArtifacts@1
+              displayName: Publish Documentation
+              inputs:
+                pathToPublish: $(Build.SourcesDirectory)/outputs/docs
+                artifactName: docs
+
+  - stage: build
+    displayName: Build Module
+    dependsOn:
+      - prelim
+    jobs:
+      - job: unit_tests
+        displayName: Run Unit Tests
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          - template: templates/setup.yml
+            parameters:
+              eirctl_version: $(eirctl_version)
+
+          - task: Bash@3
+            displayName: Run Terraform Tests
+            inputs:
+              targetType: inline
+              script: |
+                eirctl tests
+
+      - job: create_package
+        displayName: Create Package
+        dependsOn:
+          - unit_tests
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          - template: templates/setup.yml
+            parameters:
+              eirctl_version: $(eirctl_version)
+
+          - task: Bash@3
+            displayName: Package Module
+            inputs:
+              targetType: inline
+              script: |
+                eirctl build
+            env:
+              BUILD_REPOSITORY_NAME: $(Build.Repository.Name)
+              BUILDNUMBER: $(Build.BuildNumber)
+
+          - task: PublishBuildArtifacts@1
+            displayName: Publish Package
+            inputs:
+              pathToPublish: $(Build.SourcesDirectory)/outputs/$(Build.Repository.Name)-$(Build.BuildNumber).zip
+              artifactName: package
+
+          # - task: PublishBuildArtifacts@1
+          #   displayName: Publish README file
+          #   inputs:
+          #     pathToPublish: $(Build.SourcesDirectory)/outputs/module/README.md
+          #     artifactName: readme
+
+  - stage: release
+    displayName: Release to GitHub
+    dependsOn:
+      - build
+      ${{ if eq(parameters.generate_docs, true) }}:
+        - docs
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq('${{ parameters.pre_release }}', 'true')))
+    variables:
+      - group: github-creds
+    jobs:
+      - job: create_github_release
+        displayName: Create GitHub Release
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          ${{ if eq(parameters.generate_docs, true) }}:
+            - task: DownloadPipelineArtifact@2
+              displayName: Download Documentation Artifact
+              inputs:
+                artifact: docs
+                patterns: "**/*.pdf"
+                path: $(Build.SourcesDirectory)/outputs/assets
+
+          - task: DownloadPipelineArtifact@2
+            displayName: Download Package Artifact
+            inputs:
+              artifact: package
+              path: $(Build.SourcesDirectory)/outputs/assets
+
+          # - task: DownloadPipelineArtifact@2
+          #   displayName: Download README Artifact
+          #   inputs:
+          #     artifact: readme
+          #     path: $(Build.SourcesDirectory)/outputs/assets
+
+          - template: templates/setup.yml
+            parameters:
+              eirctl_version: $(eirctl_version)
+
+          - task: Bash@3
+            displayName: Release
+            inputs:
+              targetType: inline
+              script: |
+                eirctl release
+            env:
+              STAGE: release
+              PUBLISH_RELEASE: "true"
+              GITHUB_TOKEN: $(GITHUB_TOKEN)
+              OWNER: thepaulmacca-ensono
+              BUILD_REPOSITORY_NAME: $(Build.Repository.Name)
+              BUILD_BUILDNUMBER: $(Build.BuildNumber)
+              COMMIT_ID: $(Build.SourceVersion)
+              ARTIFACTS_DIR: /eirctl/outputs/assets
+              ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+                PRERELEASE: "true"

@@ -1,0 +1,32 @@
+import:
+  - ./build/eirctl/contexts.yaml
+  - ./build/eirctl/tasks.yaml
+
+pipelines:
+  build:
+    - task: build:clean
+    - task: terraform:docs
+      depends_on: build:clean
+    # - task: docs:docbook
+    #   depends_on: terraform:docs
+    # - task: docs:markdown
+    #   depends_on: docs:docbook
+    - task: build:copy
+      # depends_on: docs:markdown
+      depends_on: terraform:docs
+    - task: build:package
+      depends_on: build:copy
+
+  docs:
+    - task: docs:generate
+
+  tests:
+    - task: terraform:init
+    - task: terraform:tests
+      depends_on: terraform:init
+
+  release:
+    - task: ado:build:number
+    - task: github:release
+      depends_on:
+        - ado:build:number

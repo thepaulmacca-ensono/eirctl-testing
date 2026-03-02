@@ -1,0 +1,115 @@
+tasks:
+  # ADO
+  ## Pipelines
+  ado:build:number:
+    context: powershell
+    description: Update the Build Number in Azure DevOps
+    command:
+      - Update-BuildNumber -BuildNumber $env:BUILD_BUILDNUMBER
+
+  ado:pipeline:retain:
+    context: powershell
+    description: |
+      Retain an Azure DevOps pipeline run for a configurable number of years
+
+      Set to 365 days (1 year) by default
+    command:
+      - |
+        $retentionYears = [int]$env:RETENTION_YEARS
+        $daysValid = 365 * $retentionYears
+        $contentType = "application/json"
+        $headers = @{ Authorization = "Bearer $env:ADO_ACCESS_TOKEN" }
+        $rawRequest = @{
+            daysValid       = $daysValid
+            definitionId    = $env:SYSTEM_DEFINITIONID
+            ownerId         = "User:$env:BUILD_REQUESTEDFORID"
+            protectPipeline = $false
+            runId           = $env:BUILD_BUILDID
+        }
+        $request = ConvertTo-Json @($rawRequest)
+        $uri = "$env:SYSTEM_COLLECTIONURI$env:SYSTEM_TEAMPROJECT/_apis/build/retention/leases?api-version=6.0-preview.1"
+        $response = Invoke-RestMethod -uri $uri -method POST -Headers $headers -ContentType $contentType -Body $request
+        Write-Host "Pipeline run successfully retained for $retentionYears year(s)."
+
+  # Linting
+  lint:yaml:
+    context: infra
+    description: |
+      Perform YAML Linting using Yamllint
+
+      By default the utility uses `yamllint.conf` in the current directory
+    command:
+      - Invoke-YamlLint -FailOnWarnings $False
+
+  # Terraform
+  lint:terraform:format:
+    context: infra
+    description: Perform Terraform Format Check
+    command:
+      - Invoke-Terraform -Format -Path $env:TF_FILE_LOCATION -Debug
+
+  terraform:docs:
+    context: infra
+    description: Generate documentation for the Terraform modules
+    command:
+      - terraform-docs -c .terraform-docs.yml src/
+
+  terraform:init:
+    context: infra
+    description: Initialise Terraform for Azure
+    command: |
+      cd $env:TF_FILE_LOCATION
+      terraform init -backend=false
+
+  terraform:tests:
+    context: infra
+    description: Run Terraform Tests
+    command: |
+      cd $env:TF_FILE_LOCATION
+      terraform test
+
+  # Documentation
+  docs:docbook:
+    context: asciidoc
+    description: Convert documentation to Docbook for conversion to markdown
+    command:
+      - asciidoctor -b docbook -o outputs/tmp/README.xml docs/readme/index.adoc
+
+  docs:markdown:
+    context: asciidoc
+    description: Convert the Dockbook readme to markdown
+    command:
+      - pandoc -f docbook -t gfm -o outputs/module/README.md outputs/tmp/README.xml
+
+  docs:generate:
+    context: asciidoc
+    description: Build Docs for the module
+    command: |
+      Build-Documentation -Config /eirctl/docs/repository/conf/docs.json
+
+  # Build
+  build:clean:
+    context: powershell
+    description: Clean the outputs folder
+    command: |
+      Remove-Item -Path outputs -Recurse -Force -ErrorAction SilentlyContinue
+      if (!(Test-Path -Path outputs/module)) { (New-Item -ItemType Directory -Path outputs/module) }
+
+  build:copy:
+    context: powershell
+    description: Copy the src Terraform into the outputs/module folder
+    command: |
+      Copy-Item -Path src/* -Destination outputs/module/ -Recurse -Force -Exclude tests,.terraform,.terraform.lock.hcl
+
+  build:package:
+    context: powershell
+    description: Create the zip package for the Terraform module
+    command: |
+      Compress-Archive -Path outputs/module/* -DestinationPath outputs/${env:BUILD_REPOSITORY_NAME}-${env:BUILD_BUILDNUMBER}.zip -Force
+
+  github:release:
+    context: powershell
+    description: Publish a Release to GitHub
+    command:
+      - Write-Host "Publish-GitHubRelease -version $env:BUILD_BUILDNUMBER -commitId $env:COMMIT_ID -apikey $env:GITHUB_TOKEN -artifactsDir $env:ARTIFACTS_DIR -Owner $env:OWNER -repository $env:BUILD_REPOSITORY_NAME"
+      - Publish-GitHubRelease -version $env:BUILD_BUILDNUMBER -commitId $env:COMMIT_ID -apikey $env:GITHUB_TOKEN -artifactsDir $env:ARTIFACTS_DIR -Owner $env:OWNER -repository $env:BUILD_REPOSITORY_NAME
