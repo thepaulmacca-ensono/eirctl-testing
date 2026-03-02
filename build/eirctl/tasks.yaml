@@ -52,7 +52,7 @@ tasks:
     context: infra
     description: Generate documentation for the Terraform modules
     command:
-      - terraform-docs -c .terraform-docs.yml src/
+      - terraform-docs -c .terraform-docs.yml $env:TF_FILE_LOCATION
 
   terraform:init:
     context: infra
@@ -66,7 +66,11 @@ tasks:
     description: Run Terraform Tests
     command: |
       cd $env:TF_FILE_LOCATION
-      terraform test
+      if ($env:TF_TEST_FILTER) {
+        terraform test -filter="$env:TF_TEST_FILTER"
+      } else {
+        terraform test
+      }
 
   # Documentation
   docs:docbook:
@@ -99,7 +103,7 @@ tasks:
     context: powershell
     description: Copy the src Terraform into the outputs/module folder
     command: |
-      Copy-Item -Path src/* -Destination outputs/module/ -Recurse -Force -Exclude tests,.terraform,.terraform.lock.hcl
+      Copy-Item -Path ${env:TF_FILE_LOCATION}/* -Destination outputs/module/ -Recurse -Force -Exclude tests,.terraform,.terraform.lock.hcl
 
   build:package:
     context: powershell
