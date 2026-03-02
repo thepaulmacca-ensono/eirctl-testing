@@ -146,6 +146,7 @@ stages:
             env:
               REPOSITORY: $(Build.Repository.Name)
               BUILDNUMBER: $(Build.BuildNumber)
+              TF_FILE_LOCATION: "/eirctl/src"
 
           - task: PublishBuildArtifacts@1
             displayName: Publish Package
@@ -211,6 +212,7 @@ stages:
             env:
               STAGE: release
               PUBLISH_RELEASE: "true"
+              GENERATE_RELEASE_NOTES: "true"
               GITHUB_TOKEN: $(GITHUB_TOKEN)
               OWNER: thepaulmacca-ensono
               REPOSITORY: $(Build.Repository.Name)
