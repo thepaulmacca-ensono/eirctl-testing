@@ -1,15 +1,15 @@
-name: "0.0$(Rev:.r)"
+name: $(version_semver)
 
 parameters:
   - name: pre_release
-    displayName: Create a Pre-Release from a Feature Branch?
+    displayName: Create a Pre-Release from a Feature Branch
     type: boolean
     default: false
 
-  - name: generate_docs
+  - name: generate_documentation
+    displayName: Generate Documentation
     type: boolean
     default: false
-    displayName: Generate Documentation?
 
 trigger:
   branches:
@@ -34,10 +34,9 @@ variables:
   - template: variables.yml
 
 stages:
-  - stage: prelim
-    displayName: Preliminaries
+  - stage: Preliminaries
     jobs:
-      - job: version_number
+      - job: Build_Number
         displayName: Set Build Number
         steps:
           - checkout: self
@@ -70,13 +69,12 @@ stages:
             env:
               TF_FILE_LOCATION: "/eirctl/src"
 
-  - ${{ if eq(parameters.generate_docs, true) }}:
-      - stage: docs
-        displayName: Documentation
+  - ${{ if eq(parameters.generate_documentation, true) }}:
+      - stage: Documentation
         dependsOn:
-          - prelim
+          - Preliminaries
         jobs:
-          - job: generate_docs
+          - job: Generate_Documentation
             displayName: Generate Documentation
             steps:
               - checkout: self
@@ -101,12 +99,12 @@ stages:
                   pathToPublish: $(Build.SourcesDirectory)/outputs/docs
                   artifactName: docs
 
-  - stage: build
+  - stage: Build
     displayName: Build Module
     dependsOn:
-      - prelim
+      - Preliminaries
     jobs:
-      - job: unit_tests
+      - job: Unit_Tests
         displayName: Run Unit Tests
         steps:
           - checkout: self
@@ -125,10 +123,10 @@ stages:
             env:
               TF_FILE_LOCATION: "/eirctl/src"
 
-      - job: create_package
+      - job: Create_Package
         displayName: Create Package
         dependsOn:
-          - unit_tests
+          - Unit_Tests
         steps:
           - checkout: self
             fetchDepth: 1
@@ -161,23 +159,23 @@ stages:
           #     pathToPublish: $(Build.SourcesDirectory)/outputs/module/README.md
           #     artifactName: readme
 
-  - stage: release
+  - stage: Release
     displayName: Release to GitHub
     dependsOn:
-      - build
-      - ${{ if eq(parameters.generate_docs, true) }}:
-          - docs
+      - Build
+      - ${{ if eq(parameters.generate_documentation, true) }}:
+          - Documentation
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq('${{ parameters.pre_release }}', 'true')))
     variables:
       - group: github-creds
     jobs:
-      - job: create_github_release
+      - job: Create_GitHub_Release
         displayName: Create GitHub Release
         steps:
           - checkout: self
             fetchDepth: 1
 
-          - ${{ if eq(parameters.generate_docs, true) }}:
+          - ${{ if eq(parameters.generate_documentation, true) }}:
               - task: DownloadPipelineArtifact@2
                 displayName: Download Documentation Artifact
                 inputs:
