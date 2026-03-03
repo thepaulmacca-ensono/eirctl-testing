@@ -11,19 +11,6 @@ parameters:
     type: boolean
     default: false
 
-  - name: modules
-    displayName: Modules to Validate and Build
-    type: object
-    default:
-      - name: management_landing_zone
-        displayName: Management Landing Zone
-      - name: connectivity_landing_zone_hub_spoke
-        displayName: Connectivity Landing Zone (Hub & Spoke)
-      - name: connectivity_landing_zone_virtual_wan
-        displayName: Connectivity Landing Zone (Virtual WAN)
-      - name: identity_landing_zone
-        displayName: Identity Landing Zone
-
 trigger:
   branches:
     include:
@@ -50,7 +37,7 @@ stages:
   - stage: Preliminaries
     jobs:
       - job: Build_Number
-        displayName: Set Build Number and Validate
+        displayName: Set Build Number and Lint
         steps:
           - checkout: self
             fetchDepth: 1
@@ -78,12 +65,29 @@ stages:
     dependsOn:
       - Preliminaries
     jobs:
-      - ${{ each module in parameters.modules }}:
-          - template: templates/module_validation.yml
-            parameters:
-              module_name: ${{ module.name }}
-              display_name: ${{ module.displayName }}
-              eirctl_version: $(eirctl_version)
+      - template: templates/module_validation.yml
+        parameters:
+          module_name: management_landing_zone
+          display_name: Management Landing Zone
+          eirctl_version: $(eirctl_version)
+
+      - template: templates/module_validation.yml
+        parameters:
+          module_name: connectivity_landing_zone_hub_spoke
+          display_name: Connectivity Landing Zone (Hub & Spoke)
+          eirctl_version: $(eirctl_version)
+
+      - template: templates/module_validation.yml
+        parameters:
+          module_name: connectivity_landing_zone_virtual_wan
+          display_name: Connectivity Landing Zone (Virtual WAN)
+          eirctl_version: $(eirctl_version)
+
+      - template: templates/module_validation.yml
+        parameters:
+          module_name: identity_landing_zone
+          display_name: Identity Landing Zone
+          eirctl_version: $(eirctl_version)
 
   - ${{ if eq(parameters.generate_documentation, true) }}:
       - stage: Documentation
