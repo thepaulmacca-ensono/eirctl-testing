@@ -3,7 +3,6 @@ parameters:
     type: string
 
 steps:
-
   # Install Eirctl
   - task: Bash@3
     displayName: "Install: Eirctl"

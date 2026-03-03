@@ -15,10 +15,14 @@ parameters:
     displayName: Modules to Validate and Build
     type: object
     default:
-      - management_landing_zone
-      - connectivity_landing_zone_hub_spoke
-      - connectivity_landing_zone_virtual_wan
-      - identity_landing_zone
+      - name: management_landing_zone
+        displayName: Management Landing Zone
+      - name: connectivity_landing_zone_hub_spoke
+        displayName: Connectivity Landing Zone (Hub & Spoke)
+      - name: connectivity_landing_zone_virtual_wan
+        displayName: Connectivity Landing Zone (Virtual WAN)
+      - name: identity_landing_zone
+        displayName: Identity Landing Zone
 
 trigger:
   branches:
@@ -77,7 +81,8 @@ stages:
       - ${{ each module in parameters.modules }}:
           - template: templates/module_validation.yml
             parameters:
-              module_name: ${{ module }}
+              module_name: ${{ module.name }}
+              display_name: ${{ module.displayName }}
               eirctl_version: $(eirctl_version)
 
   - ${{ if eq(parameters.generate_documentation, true) }}:

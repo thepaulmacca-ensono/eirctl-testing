@@ -2,13 +2,15 @@ parameters:
   - name: module_name
     type: string
     displayName: Module name (directory under src/)
-
+  - name: display_name
+    type: string
+    displayName: Display name for the module
   - name: eirctl_version
     type: string
 
 jobs:
   - job: validate_${{ replace(parameters.module_name, '-', '_') }}
-    displayName: "Validate: ${{ parameters.module_name }}"
+    displayName: "Validate: ${{ parameters.display_name }}"
     steps:
       - checkout: self
         fetchDepth: 1
