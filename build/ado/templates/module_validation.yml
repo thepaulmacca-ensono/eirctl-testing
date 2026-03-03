@@ -24,15 +24,13 @@ jobs:
         inputs:
           targetType: inline
           script: |
+            export TF_FILE_LOCATION="src/${{ parameters.module_name }}/deploy/terraform"
             eirctl lint:terraform:format
-        env:
-          TF_FILE_LOCATION: src/${{ parameters.module_name }}/deploy/terraform
 
       - task: Bash@3
         displayName: Run Terraform Tests
         inputs:
           targetType: inline
           script: |
+            export TF_FILE_LOCATION="src/${{ parameters.module_name }}/deploy/terraform"
             eirctl tests
-        env:
-          TF_FILE_LOCATION: src/${{ parameters.module_name }}/deploy/terraform
