@@ -1,4 +1,4 @@
-name: $(version_semver)
+name: $(version_major).$(version_minor).$(version_revision)
 
 parameters:
   - name: pre_release
