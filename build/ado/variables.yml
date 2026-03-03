@@ -9,13 +9,16 @@ variables:
   - name: version_semver
     value: "$(version_major).$(version_minor).$(version_revision)"
 
-  # Dependency versions
   # Eirctl https://github.com/Ensono/eirctl/releases
   - name: eirctl_version
     value: 0.9.11
-  # Tenv
   - name: TENV_AUTO_INSTALL
     value: true
 
+  # ADO
   - name: pool_vm_image
     value: ubuntu-24.04
+
+  # Terraform
+  - name: TF_FILE_LOCATION
+    value: "/eirctl/src"

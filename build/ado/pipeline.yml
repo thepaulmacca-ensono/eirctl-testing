@@ -37,7 +37,7 @@ stages:
   - stage: Preliminaries
     jobs:
       - job: Build_Number
-        displayName: Set Build Number
+        displayName: Set Build Number and Validate
         steps:
           - checkout: self
             fetchDepth: 1
@@ -67,7 +67,7 @@ stages:
               script: |
                 eirctl lint:terraform:format
             env:
-              TF_FILE_LOCATION: "/eirctl/src"
+              TF_FILE_LOCATION: $(TF_FILE_LOCATION)
 
   - ${{ if eq(parameters.generate_documentation, true) }}:
       - stage: Documentation
@@ -121,7 +121,7 @@ stages:
               script: |
                 eirctl tests
             env:
-              TF_FILE_LOCATION: "/eirctl/src"
+              TF_FILE_LOCATION: $(TF_FILE_LOCATION)
 
       - job: Create_Package
         displayName: Create Package
@@ -144,7 +144,7 @@ stages:
             env:
               REPOSITORY: $(Build.Repository.Name)
               BUILDNUMBER: $(Build.BuildNumber)
-              TF_FILE_LOCATION: "/eirctl/src"
+              TF_FILE_LOCATION: $(TF_FILE_LOCATION)
 
           - task: PublishBuildArtifacts@1
             displayName: Publish Package
@@ -208,7 +208,7 @@ stages:
               script: |
                 eirctl release
             env:
-              STAGE: release
+              STAGE: Release
               PUBLISH_RELEASE: "true"
               GITHUB_TOKEN: $(GITHUB_TOKEN)
               OWNER: thepaulmacca-ensono
