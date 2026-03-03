@@ -26,6 +26,8 @@ jobs:
           workingDirectory: $(System.DefaultWorkingDirectory)/src/${{ parameters.module_name }}
           script: |
             eirctl lint:terraform:format
+        env:
+          TF_FILE_LOCATION: deploy/terraform
 
       - task: Bash@3
         displayName: Run Terraform Tests
@@ -34,3 +36,5 @@ jobs:
           workingDirectory: $(System.DefaultWorkingDirectory)/src/${{ parameters.module_name }}
           script: |
             eirctl tests
+        env:
+          TF_FILE_LOCATION: deploy/terraform
