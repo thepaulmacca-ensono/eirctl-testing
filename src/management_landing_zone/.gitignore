@@ -55,3 +55,6 @@ terraform.rc
 
 # Eirctl
 eirctl.env
+
+# Azure Landing Zones Library
+.alzlib

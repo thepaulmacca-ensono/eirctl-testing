@@ -11,6 +11,15 @@ parameters:
     type: boolean
     default: false
 
+  - name: modules
+    displayName: Modules to Validate and Build
+    type: object
+    default:
+      - management_landing_zone
+      - connectivity_landing_zone_hub_spoke
+      - connectivity_landing_zone_virtual_wan
+      - identity_landing_zone
+
 trigger:
   branches:
     include:
@@ -60,19 +69,21 @@ stages:
               script: |
                 eirctl lint:yaml
 
-          - task: Bash@3
-            displayName: Perform Terraform Format Check
-            inputs:
-              targetType: inline
-              script: |
-                eirctl lint:terraform:format
-            env:
-              TF_FILE_LOCATION: $(TF_FILE_LOCATION)
+  - stage: Validate
+    displayName: Validate Modules
+    dependsOn:
+      - Preliminaries
+    jobs:
+      - ${{ each module in parameters.modules }}:
+          - template: templates/module_validation.yml
+            parameters:
+              module_name: ${{ module }}
+              eirctl_version: $(eirctl_version)
 
   - ${{ if eq(parameters.generate_documentation, true) }}:
       - stage: Documentation
         dependsOn:
-          - Preliminaries
+          - Validate
         jobs:
           - job: Generate_Documentation
             displayName: Generate Documentation
@@ -100,33 +111,12 @@ stages:
                   artifactName: docs
 
   - stage: Build
-    displayName: Build Module
+    displayName: Build Package
     dependsOn:
-      - Preliminaries
+      - Validate
     jobs:
-      - job: Unit_Tests
-        displayName: Run Unit Tests
-        steps:
-          - checkout: self
-            fetchDepth: 1
-
-          - template: templates/setup.yml
-            parameters:
-              eirctl_version: $(eirctl_version)
-
-          - task: Bash@3
-            displayName: Run Terraform Tests
-            inputs:
-              targetType: inline
-              script: |
-                eirctl tests
-            env:
-              TF_FILE_LOCATION: $(TF_FILE_LOCATION)
-
       - job: Create_Package
         displayName: Create Package
-        dependsOn:
-          - Unit_Tests
         steps:
           - checkout: self
             fetchDepth: 1
@@ -136,7 +126,7 @@ stages:
               eirctl_version: $(eirctl_version)
 
           - task: Bash@3
-            displayName: Package Module
+            displayName: Package All Modules
             inputs:
               targetType: inline
               script: |
