@@ -7,10 +7,14 @@ parameters:
     displayName: Display name for the module
   - name: eirctl_version
     type: string
+  - name: run_condition
+    type: string
+    default: "true"
 
 jobs:
   - job: validate_${{ replace(parameters.module_name, '-', '_') }}
     displayName: "Validate: ${{ parameters.display_name }}"
+    condition: ${{ parameters.run_condition }}
     steps:
       - checkout: self
         fetchDepth: 1
@@ -19,6 +23,8 @@ jobs:
         parameters:
           eirctl_version: ${{ parameters.eirctl_version }}
 
+      # NOTE: export is required because eirctl runs inside Docker containers
+      # where ADO env: blocks do not override values from eirctl.env
       - task: Bash@3
         displayName: Terraform Format Check
         inputs:
