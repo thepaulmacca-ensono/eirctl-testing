@@ -24,9 +24,8 @@ jobs:
           eirctl_version: ${{ parameters.eirctl_version }}
 
       # NOTE: export is required because eirctl runs inside Docker containers
-      # where ADO env: blocks do not override values from eirctl.env
       - task: Bash@3
-        displayName: Terraform Format Check
+        displayName: Run Terraform Format Check
         inputs:
           targetType: inline
           script: |

@@ -36,7 +36,7 @@ variables:
 stages:
   - stage: Preliminaries
     jobs:
-      - job: Build_Number
+      - job: Build_Lint
         displayName: Set Build Number and Lint YAML
         steps:
           - checkout: self
@@ -62,6 +62,7 @@ stages:
 
       - job: Detect_Changes
         displayName: Detect Module Changes
+        dependsOn: Build_Lint
         steps:
           - checkout: self
             fetchDepth: 0
@@ -161,18 +162,17 @@ stages:
                   BUILDNUMBER: $(Build.BuildNumber)
 
               - task: PublishPipelineArtifact@1
-                displayName: Publish Documentation
+                displayName: Publish Documentation Artifact
                 inputs:
                   targetPath: $(Build.SourcesDirectory)/outputs/docs
                   artifact: docs
 
   - stage: Build
-    displayName: Build Package
     dependsOn:
       - Validate
     jobs:
-      - job: Create_Package
-        displayName: Create Package
+      - job: Build_Package
+        displayName: Build and Create Package
         steps:
           - checkout: self
             fetchDepth: 1
@@ -182,7 +182,7 @@ stages:
               eirctl_version: $(eirctl_version)
 
           - task: Bash@3
-            displayName: Package All Modules
+            displayName: Build and Package Modules
             inputs:
               targetType: inline
               script: |
@@ -193,7 +193,7 @@ stages:
               TF_FILE_LOCATION: $(TF_FILE_LOCATION)
 
           - task: PublishPipelineArtifact@1
-            displayName: Publish Package
+            displayName: Publish Package Artifact
             inputs:
               targetPath: $(Build.SourcesDirectory)/outputs
               artifact: package
