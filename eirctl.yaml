@@ -21,6 +21,16 @@ pipelines:
   docs:
     - task: docs:generate
 
+  scan:
+    - task: scan:terraform:checkov
+
+  terraform:lint:
+    - task: lint:terraform:format
+    - task: lint:terraform:validate
+      depends_on: lint:terraform:format
+    - task: lint:terraform:tflint
+      depends_on: lint:terraform:validate
+
   tests:
     - task: terraform:init
     - task: terraform:tests

@@ -15,6 +15,8 @@ jobs:
   - job: validate_${{ replace(parameters.module_name, '-', '_') }}
     displayName: "Validate: ${{ parameters.display_name }}"
     condition: ${{ parameters.run_condition }}
+    variables:
+      TF_FILE_LOCATION: "src/${{ parameters.module_name }}/deploy/terraform"
     steps:
       - checkout: self
         fetchDepth: 1
@@ -23,19 +25,20 @@ jobs:
         parameters:
           eirctl_version: ${{ parameters.eirctl_version }}
 
-      # NOTE: export is required because eirctl runs inside Docker containers
       - task: Bash@3
-        displayName: Run Terraform Format Check
+        displayName: Run Terraform Linting Checks
         inputs:
           targetType: inline
-          script: |
-            export TF_FILE_LOCATION="src/${{ parameters.module_name }}/deploy/terraform"
-            eirctl lint:terraform:format
+          script: eirctl terraform:lint
 
       - task: Bash@3
-        displayName: Run Terraform Tests
+        displayName: Run Checkov Scan
         inputs:
           targetType: inline
-          script: |
-            export TF_FILE_LOCATION="src/${{ parameters.module_name }}/deploy/terraform"
-            eirctl tests
+          script: eirctl scan
+
+      - task: Bash@3
+        displayName: Run Terraform Unit Tests
+        inputs:
+          targetType: inline
+          script: eirctl tests

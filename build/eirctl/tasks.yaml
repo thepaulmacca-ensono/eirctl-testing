@@ -48,6 +48,23 @@ tasks:
     command:
       - Invoke-Terraform -Format -Path $env:TF_FILE_LOCATION -Debug
 
+  lint:terraform:validate:
+    context: infra
+    description: Perform Terraform Validation
+    command:
+      - Invoke-Terraform -Validate -Path $env:TF_FILE_LOCATION -Debug
+
+  lint:terraform:tflint:
+    context: infra
+    description: Perform Terraform Linting using TFLint
+    command:
+      - |
+        tflint --version
+        Write-Host ("Path: {0}" -f $env:TF_FILE_LOCATION)
+
+        tflint --init
+        tflint --chdir=$env:TF_FILE_LOCATION
+
   terraform:docs:
     context: infra
     description: Generate documentation for the Terraform modules
@@ -56,10 +73,25 @@ tasks:
 
   terraform:init:
     context: infra
-    description: Initialise Terraform for Azure
-    command: |
-      cd $env:TF_FILE_LOCATION
-      terraform init -backend=false
+    description: |
+      Initialise Terraform
+
+      Set TF_BACKEND_FALSE=true to skip backend configuration (e.g., for CI validation)
+    command:
+      - |
+        $arguments = @()
+        if ($env:TF_BACKEND_INIT) {
+          $arguments += $env:TF_BACKEND_INIT
+        }
+        if ($env:TF_BACKEND_FALSE -eq "true") {
+          $arguments += "-backend=false"
+        }
+
+        Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $arguments -Debug
+
+        if ($env:TF_BACKEND_FALSE -ne "true" -and $env:ENVIRONMENT_NAME) {
+          Invoke-Terraform -Workspace -Path $env:TF_FILE_LOCATION -Arguments $env:ENVIRONMENT_NAME -Debug
+        }
 
   terraform:tests:
     context: infra
@@ -71,6 +103,26 @@ tasks:
       } else {
         terraform test
       }
+
+  # Scanning
+  scan:terraform:checkov:
+    context: infra
+    description: Perform Terraform Static Code Analysis using Checkov
+    command:
+      - |
+        Write-Host ("Path: {0}" -f $env:TF_FILE_LOCATION)
+
+        if ([string]::IsNullOrEmpty($env:CHECKOV_VERSION)) {
+          pip3 -q install -U checkov
+        } else {
+          $currentVersion = (checkov -v 2>&1) -match '\d+(\.\d+)+' | Out-Null; $matches[0]
+          if ($currentVersion -ne $env:CHECKOV_VERSION) {
+            Write-Host ("Installing Checkov version {0}" -f $env:CHECKOV_VERSION)
+            pip3 -q install -U checkov==$env:CHECKOV_VERSION
+          }
+        }
+
+        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,results.xml
 
   # Documentation
   docs:docbook:

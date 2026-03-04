@@ -22,3 +22,5 @@ variables:
   # Terraform
   - name: TF_FILE_LOCATION
     value: "/eirctl/src"
+  - name: TF_BACKEND_FALSE
+    value: true
