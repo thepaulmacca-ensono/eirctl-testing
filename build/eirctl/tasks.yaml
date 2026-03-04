@@ -100,10 +100,17 @@ tasks:
       Set TF_TEST_FILTER to run a specific test file (e.g., TF_TEST_FILTER=tests/main.tftest.hcl)
     command: |
       cd $env:TF_FILE_LOCATION
+      $junitPath = "/eirctl/terraform-test-results.xml"
       if ($env:TF_TEST_FILTER) {
-        terraform test -junit-xml=terraform-test-results.xml -filter="$env:TF_TEST_FILTER"
+        terraform test -junit-xml=$junitPath -filter="$env:TF_TEST_FILTER"
       } else {
-        terraform test -junit-xml=terraform-test-results.xml
+        terraform test -junit-xml=$junitPath
+      }
+      if (Test-Path $junitPath) {
+        Write-Host "JUnit XML written to: $junitPath"
+      } else {
+        Write-Warning "terraform-test-results.xml was NOT created — -junit-xml may not be supported by this Terraform version"
+        Get-ChildItem /eirctl -Filter *.xml -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "Found XML: $($_.FullName)" }
       }
 
   # Scanning
@@ -124,7 +131,7 @@ tasks:
           }
         }
 
-        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,checkov-results.xml
+        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,checkov-results
 
   # Documentation
   docs:docbook:

@@ -40,7 +40,7 @@ jobs:
         condition: succeededOrFailed()
         inputs:
           testResultsFormat: JUnit
-          testResultsFiles: '**/checkov-results.xml'
+          testResultsFiles: '**/checkov-results/results_junitxml.xml'
           testRunTitle: 'Checkov Scan - ${{ parameters.display_name }}'
 
       - task: Bash@3
