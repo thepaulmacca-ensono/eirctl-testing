@@ -101,9 +101,9 @@ tasks:
     command: |
       cd $env:TF_FILE_LOCATION
       if ($env:TF_TEST_FILTER) {
-        terraform test -filter="$env:TF_TEST_FILTER"
+        terraform test -junit-xml=terraform-test-results.xml -filter="$env:TF_TEST_FILTER"
       } else {
-        terraform test
+        terraform test -junit-xml=terraform-test-results.xml
       }
 
   # Scanning
@@ -124,24 +124,24 @@ tasks:
           }
         }
 
-        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,results.xml
+        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,checkov-results.xml
 
   # Documentation
   docs:docbook:
     context: asciidoc
-    description: Convert documentation to Docbook for conversion to markdown
+    description: Convert Documentation to Docbook for conversion to Markdown
     command:
       - asciidoctor -b docbook -o outputs/tmp/README.xml docs/readme/index.adoc
 
   docs:markdown:
     context: asciidoc
-    description: Convert the Dockbook readme to markdown
+    description: Convert the Docbook README to Markdown
     command:
       - pandoc -f docbook -t gfm -o outputs/module/README.md outputs/tmp/README.xml
 
   docs:generate:
     context: asciidoc
-    description: Build Docs for the module
+    description: Build Docs for the Module
     command: |
       Build-Documentation -Config /eirctl/docs/repository/conf/docs.json
 
@@ -155,16 +155,34 @@ tasks:
 
   build:copy:
     context: powershell
-    description: Copy the src Terraform into the outputs/module folder
+    description: Copy the Terraform Module into the outputs/module folder
     command: |
       Copy-Item -Path ${env:TF_FILE_LOCATION}/* -Destination outputs/module/ -Recurse -Force -Exclude tests,.terraform,.terraform.lock.hcl
 
   build:package:
     context: powershell
-    description: Create the zip package for the Terraform module
+    description: |
+      Create Zip Package for the Terraform Module
+
+      Resolves repository name from GITHUB_REPOSITORY or BUILD_REPOSITORY_NAME.
+      Resolves build number from BUILD_BUILDNUMBER or GITHUB_RUN_NUMBER.
     command: |
-      $repo_name = ($env:REPOSITORY -split '/')[-1]
-      Compress-Archive -Path outputs/module/* -DestinationPath outputs/${repo_name}-${env:BUILD_BUILDNUMBER}.zip -Force
+      $repoFullName = if ($env:GITHUB_REPOSITORY) { $env:GITHUB_REPOSITORY } else { $env:BUILD_REPOSITORY_NAME }
+      if (-not $repoFullName) {
+        Write-Error "GITHUB_REPOSITORY or BUILD_REPOSITORY_NAME environment variable is required"
+        exit 1
+      }
+      $repoName = ($repoFullName -split '/')[-1]
+
+      $buildNumber = if ($env:BUILD_BUILDNUMBER) { $env:BUILD_BUILDNUMBER } else { $env:GITHUB_RUN_NUMBER }
+      if (-not $buildNumber) {
+        Write-Error "BUILD_BUILDNUMBER or GITHUB_RUN_NUMBER environment variable is required"
+        exit 1
+      }
+
+      $zipPath = ("outputs/{0}-{1}.zip" -f $repoName, $buildNumber)
+      Write-Host ("Creating package: {0}" -f $zipPath)
+      Compress-Archive -Path outputs/module/* -DestinationPath $zipPath -Force
 
   # GitHub
   ## Release

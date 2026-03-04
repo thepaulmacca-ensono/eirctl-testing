@@ -62,7 +62,6 @@ stages:
 
       - job: Detect_Changes
         displayName: Detect Module Changes
-        dependsOn: Build_Lint
         steps:
           - checkout: self
             fetchDepth: 0
@@ -79,9 +78,9 @@ stages:
                   BASE="HEAD~1"
                 fi
 
-                CHANGED=$(git diff --name-only $BASE HEAD 2>/dev/null)
-                if [ $? -ne 0 ] || [ -z "$CHANGED" ] && [ "$BASE" = "HEAD~1" ]; then
-                  echo "Unable to determine changes, defaulting to run all modules"
+                CHANGED=$(git diff --name-only $BASE HEAD 2>&1)
+                if { [ $? -ne 0 ] || [ -z "$CHANGED" ]; } && [ "$BASE" = "HEAD~1" ]; then
+                  echo "Warning: Unable to determine changes (git diff output: $CHANGED), defaulting to run all modules"
                   CHANGED="src/"
                 fi
 
@@ -187,8 +186,6 @@ stages:
               script: |
                 eirctl build
             env:
-              REPOSITORY: $(Build.Repository.Name)
-              BUILDNUMBER: $(Build.BuildNumber)
               TF_FILE_LOCATION: $(TF_FILE_LOCATION)
 
           - task: PublishPipelineArtifact@1
@@ -246,5 +243,4 @@ stages:
               BUILD_BUILDNUMBER: $(Build.BuildNumber)
               COMMIT_ID: $(Build.SourceVersion)
               ARTIFACTS_DIR: /eirctl/outputs/assets
-              ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/main') }}:
-                PRERELEASE: "true"
+              PRERELEASE: $(is_pre_release)

@@ -35,8 +35,24 @@ jobs:
           targetType: inline
           script: eirctl scan
 
+      - task: PublishTestResults@2
+        displayName: Publish Checkov Scan Results
+        condition: succeededOrFailed()
+        inputs:
+          testResultsFormat: JUnit
+          testResultsFiles: '**/checkov-results.xml'
+          testRunTitle: 'Checkov Scan - ${{ parameters.display_name }}'
+
       - task: Bash@3
         displayName: Run Terraform Unit Tests
         inputs:
           targetType: inline
           script: eirctl tests
+
+      - task: PublishTestResults@2
+        displayName: Publish Terraform Test Results
+        condition: succeededOrFailed()
+        inputs:
+          testResultsFormat: JUnit
+          testResultsFiles: '**/terraform-test-results.xml'
+          testRunTitle: 'Terraform Tests - ${{ parameters.display_name }}'
