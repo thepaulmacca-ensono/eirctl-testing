@@ -5,7 +5,7 @@ parameters:
 steps:
   # Install Eirctl
   - task: Bash@3
-    displayName: "Install: Eirctl"
+    displayName: "Install Eirctl v${{ parameters.eirctl_version }}"
     inputs:
       targetType: inline
       script: |

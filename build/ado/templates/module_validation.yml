@@ -1,10 +1,8 @@
 parameters:
   - name: module_name
     type: string
-    displayName: Module name (directory under src/)
   - name: display_name
     type: string
-    displayName: Display name for the module
   - name: eirctl_version
     type: string
   - name: run_condition
@@ -13,7 +11,7 @@ parameters:
 
 jobs:
   - job: validate_${{ replace(parameters.module_name, '-', '_') }}
-    displayName: "Validate: ${{ parameters.display_name }}"
+    displayName: "Validate ${{ parameters.display_name }} Module"
     condition: ${{ parameters.run_condition }}
     variables:
       TF_FILE_LOCATION: "src/${{ parameters.module_name }}/deploy/terraform"

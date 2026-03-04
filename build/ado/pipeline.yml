@@ -100,7 +100,6 @@ stages:
                 done
 
   - stage: Validate
-    displayName: Validate Modules
     dependsOn:
       - Preliminaries
     variables:
