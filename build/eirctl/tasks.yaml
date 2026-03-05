@@ -110,9 +110,10 @@ tasks:
   terraform:tests:
     context: infra
     description: |
-      Run Terraform Tests and produce JUnit XML at /eirctl/terraform-test-results.xml
+      Run Terraform Tests and produce JUnit XML at terraform-test-results.xml
       Set TF_TEST_FILTER to run a specific test file (e.g., TF_TEST_FILTER=tests/main.tftest.hcl)
     command: |
+      $root = $PWD.Path
       cd $env:TF_FILE_LOCATION
       $filter = if ($env:TF_TEST_FILTER) { "-filter=$($env:TF_TEST_FILTER)" }
       $tests = @(& terraform test -json $filter 2>&1 | ForEach-Object {
@@ -129,7 +130,7 @@ tasks:
         $x += "</testcase>"
       }
       $x += "</testsuite></testsuites>"
-      $x | Out-File /eirctl/terraform-test-results.xml -Encoding UTF8
+      $x | Out-File "$root/terraform-test-results.xml" -Encoding UTF8
       if ($fail) { exit 1 }
     required:
       env:
@@ -144,13 +145,13 @@ tasks:
         $pkg = if ($env:CHECKOV_VERSION) { "checkov==$env:CHECKOV_VERSION" } else { "checkov" }
         pip3 -q install -U $pkg
 
-        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,/eirctl/checkov-results
+        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,checkov-results
 
-        if (Test-Path /eirctl/checkov-results/results_junitxml.xml) {
-          Write-Host "Checkov JUnit XML written to: /eirctl/checkov-results/results_junitxml.xml"
+        if (Test-Path checkov-results/results_junitxml.xml) {
+          Write-Host "Checkov JUnit XML written to: checkov-results/results_junitxml.xml"
         } else {
-          Write-Warning "Checkov JUnit XML was not created at /eirctl/checkov-results/results_junitxml.xml"
-          Get-ChildItem /eirctl -Filter *.xml -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "Found XML: $($_.FullName)" }
+          Write-Warning "Checkov JUnit XML was not created at checkov-results/results_junitxml.xml"
+          Get-ChildItem . -Filter *.xml -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "Found XML: $($_.FullName)" }
         }
     required:
       env:
