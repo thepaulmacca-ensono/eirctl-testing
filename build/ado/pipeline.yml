@@ -124,12 +124,12 @@ stages:
         ${{ module.name }}_changed: $[stageDependencies.Preliminaries.Detect_Changes.outputs['modules.${{ module.name }}']]
     jobs:
       - ${{ each module in parameters.modules }}:
-        - template: templates/module_validation.yml
-          parameters:
-            module_name: ${{ module.name }}
-            display_name: ${{ module.display_name }}
-            eirctl_version: $(eirctl_version)
-            run_condition: eq(variables.${{ module.name }}_changed, 'true')
+          - template: templates/module_validation.yml
+            parameters:
+              module_name: ${{ module.name }}
+              display_name: ${{ module.display_name }}
+              eirctl_version: $(eirctl_version)
+              run_condition: eq(variables.${{ module.name }}_changed, 'true')
 
   - ${{ if eq(parameters.generate_documentation, true) }}:
       - stage: Documentation
