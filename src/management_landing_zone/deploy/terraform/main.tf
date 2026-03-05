@@ -16,7 +16,6 @@ provider "azurerm" {
 }
 
 # Management Resource Group
-#
 resource "azurerm_resource_group" "management" {
   name     = "rg-management"
   location = "uksouth"
@@ -31,13 +30,13 @@ resource "azurerm_log_analytics_workspace" "management" {
   retention_in_days   = 30
 }
 
-# Storage Account - deliberately insecure for checkov testing
+# Storage Account
 resource "azurerm_storage_account" "management" {
   name                            = "stmanagement"
   location                        = azurerm_resource_group.management.location
   resource_group_name             = azurerm_resource_group.management.name
   account_tier                    = "Standard"
   account_replication_type        = "LRS"
-  https_traffic_only_enabled      = false
-  allow_nested_items_to_be_public = true
+  https_traffic_only_enabled      = true
+  allow_nested_items_to_be_public = false
 }
