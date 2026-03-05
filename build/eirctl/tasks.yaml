@@ -147,7 +147,7 @@ tasks:
         pip3 -q install -U $pkg
 
         New-Item -ItemType Directory -Path test-results -Force | Out-Null
-        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,test-results/checkov-results.xml --soft-fail
+        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,test-results/checkov-results.xml
     required:
       env:
         - TF_FILE_LOCATION
@@ -221,7 +221,8 @@ tasks:
       Publish a Release to GitHub
 
       Resolves version from BUILD_BUILDNUMBER or GITHUB_RUN_NUMBER.
-      Resolves commit ID from COMMIT_ID or GITHUB_SHA.
+      Resolves commit ID from BUILD_SOURCEVERSION (ADO) or GITHUB_SHA (GHA).
+      ARTIFACTS_DIR defaults to outputs/assets if not set.
     command: |
       $repoFullName = if ($env:GITHUB_REPOSITORY) { $env:GITHUB_REPOSITORY } else { $env:BUILD_REPOSITORY_NAME }
       if (-not $repoFullName) {
@@ -237,9 +238,12 @@ tasks:
         exit 1
       }
 
-      $commitId = if ($env:COMMIT_ID) { $env:COMMIT_ID } elseif ($env:BUILD_SOURCEVERSION) { $env:BUILD_SOURCEVERSION } else { $env:GITHUB_SHA }
+      $commitId = if ($env:BUILD_SOURCEVERSION) { $env:BUILD_SOURCEVERSION } else { $env:GITHUB_SHA }
 
-      Publish-GitHubRelease -version $version -commitId $commitId -apikey $env:GITHUB_TOKEN -artifactsDir $env:ARTIFACTS_DIR -Owner $owner -repository $repo -generateReleaseNotes $true
+      $artifactsDir = if ($env:ARTIFACTS_DIR) { $env:ARTIFACTS_DIR } else { "outputs/assets" }
+
+      Publish-GitHubRelease -version $version -commitId $commitId -apikey $env:GITHUB_TOKEN -artifactsDir $artifactsDir -Owner $owner -repository $repo -generateReleaseNotes $true
     required:
       env:
         - GITHUB_TOKEN
+        - PUBLISH_RELEASE

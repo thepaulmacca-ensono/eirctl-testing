@@ -11,6 +11,19 @@ parameters:
     type: boolean
     default: false
 
+  - name: modules
+    displayName: Modules to Validate
+    type: object
+    default:
+      - name: management_landing_zone
+        display_name: Management Landing Zone
+      - name: connectivity_landing_zone_hub_spoke
+        display_name: Connectivity Landing Zone (Hub & Spoke)
+      - name: connectivity_landing_zone_virtual_wan
+        display_name: Connectivity Landing Zone (Virtual WAN)
+      - name: identity_landing_zone
+        display_name: Identity Landing Zone
+
 trigger:
   branches:
     include:
@@ -88,7 +101,12 @@ stages:
                 echo "$CHANGED"
                 echo ""
 
-                for MODULE in management_landing_zone connectivity_landing_zone_hub_spoke connectivity_landing_zone_virtual_wan identity_landing_zone; do
+                MODULES=$(cat <<'EOF' | jq -r '.[].name'
+                ${{ convertToJson(parameters.modules) }}
+                EOF
+                )
+
+                for MODULE in $MODULES; do
                   if echo "$CHANGED" | grep -q "^src/$MODULE/"; then
                     echo "$MODULE: changed"
                     echo "##vso[task.setvariable variable=${MODULE};isOutput=true]true"
@@ -102,38 +120,16 @@ stages:
     dependsOn:
       - Preliminaries
     variables:
-      management_landing_zone_changed: $[stageDependencies.Preliminaries.Detect_Changes.outputs['modules.management_landing_zone']]
-      connectivity_landing_zone_hub_spoke_changed: $[stageDependencies.Preliminaries.Detect_Changes.outputs['modules.connectivity_landing_zone_hub_spoke']]
-      connectivity_landing_zone_virtual_wan_changed: $[stageDependencies.Preliminaries.Detect_Changes.outputs['modules.connectivity_landing_zone_virtual_wan']]
-      identity_landing_zone_changed: $[stageDependencies.Preliminaries.Detect_Changes.outputs['modules.identity_landing_zone']]
+      ${{ each module in parameters.modules }}:
+        ${{ module.name }}_changed: $[stageDependencies.Preliminaries.Detect_Changes.outputs['modules.${{ module.name }}']]
     jobs:
-      - template: templates/module_validation.yml
-        parameters:
-          module_name: management_landing_zone
-          display_name: Management Landing Zone
-          eirctl_version: $(eirctl_version)
-          run_condition: eq(variables.management_landing_zone_changed, 'true')
-
-      - template: templates/module_validation.yml
-        parameters:
-          module_name: connectivity_landing_zone_hub_spoke
-          display_name: Connectivity Landing Zone (Hub & Spoke)
-          eirctl_version: $(eirctl_version)
-          run_condition: eq(variables.connectivity_landing_zone_hub_spoke_changed, 'true')
-
-      - template: templates/module_validation.yml
-        parameters:
-          module_name: connectivity_landing_zone_virtual_wan
-          display_name: Connectivity Landing Zone (Virtual WAN)
-          eirctl_version: $(eirctl_version)
-          run_condition: eq(variables.connectivity_landing_zone_virtual_wan_changed, 'true')
-
-      - template: templates/module_validation.yml
-        parameters:
-          module_name: identity_landing_zone
-          display_name: Identity Landing Zone
-          eirctl_version: $(eirctl_version)
-          run_condition: eq(variables.identity_landing_zone_changed, 'true')
+      - ${{ each module in parameters.modules }}:
+        - template: templates/module_validation.yml
+          parameters:
+            module_name: ${{ module.name }}
+            display_name: ${{ module.display_name }}
+            eirctl_version: $(eirctl_version)
+            run_condition: eq(variables.${{ module.name }}_changed, 'true')
 
   - ${{ if eq(parameters.generate_documentation, true) }}:
       - stage: Documentation
