@@ -46,7 +46,7 @@ override.tf.json
 terraform.rc
 
 # Junit
-**/results.xml
+**/*.xml
 
 # Eirctl
 eirctl.env

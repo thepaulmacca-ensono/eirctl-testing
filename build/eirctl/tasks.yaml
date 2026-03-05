@@ -116,25 +116,17 @@ tasks:
       $root = $PWD.Path
       cd $env:TF_FILE_LOCATION
       $filter = if ($env:TF_TEST_FILTER) { "-filter=$($env:TF_TEST_FILTER)" }
-      $raw = @(& terraform test -json $filter 2>&1 | ForEach-Object { $_.ToString() })
-      $raw | ForEach-Object { Write-Host "TF_JSON: $_" }
-      $tests = @($raw | ForEach-Object {
-        try { $_ | ConvertFrom-Json -EA Stop } catch {}
-      } | Where-Object { $_.type -eq 'test_run' -and ($_.status -or $_.test_progress.complete) })
-      $fail = @($tests | Where-Object {
-        $s = if ($_.status) { $_.status } else { $_.test_progress.complete.status }
-        $s -ne 'pass'
-      }).Count
+      $tests = @(& terraform test -json $filter 2>&1 | ForEach-Object {
+        try { $_.ToString() | ConvertFrom-Json -EA Stop } catch {}
+      } | Where-Object { $_.type -eq 'test_run' -and $_.test_run.progress -eq 'complete' })
+      $fail = @($tests | Where-Object { $_.test_run.status -ne 'pass' }).Count
       Write-Host "$($tests.Count) tests: $($tests.Count - $fail) passed, $fail failed."
       $e = [System.Security.SecurityElement]
       $x = '<?xml version="1.0" encoding="UTF-8"?>' +
         "<testsuites tests=`"$($tests.Count)`" failures=`"$fail`"><testsuite name=`"terraform`" tests=`"$($tests.Count)`" failures=`"$fail`">"
       $tests | ForEach-Object {
-        $name = if ($_.test_run -is [string]) { $_.test_run } else { $_.test_run.run }
-        $cls = if ($_.test_file) { $_.test_file } elseif ($_.test_run.path) { $_.test_run.path } else { 'terraform' }
-        $s = if ($_.status) { $_.status } else { $_.test_progress.complete.status }
-        $x += "<testcase name=`"$($e::Escape($name))`" classname=`"$($e::Escape($cls))`">"
-        if ($s -ne 'pass') { $m = $e::Escape($_.'@message'); $x += "<failure message=`"$m`">$m</failure>" }
+        $x += "<testcase name=`"$($e::Escape($_.test_run.run))`" classname=`"$($e::Escape($_.test_run.path))`">"
+        if ($_.test_run.status -ne 'pass') { $m = $e::Escape($_.'@message'); $x += "<failure message=`"$m`">$m</failure>" }
         $x += "</testcase>"
       }
       $x += "</testsuite></testsuites>"

@@ -35,21 +35,6 @@ jobs:
           targetType: inline
           script: eirctl scan
 
-      - task: Bash@3
-        displayName: Debug - Find Checkov Results
-        condition: succeededOrFailed()
-        inputs:
-          targetType: inline
-          script: |
-            echo "=== Checkov results ==="
-            if [ -f "$(Build.SourcesDirectory)/checkov-results.xml" ]; then
-              echo "File exists, size: $(wc -c < "$(Build.SourcesDirectory)/checkov-results.xml") bytes"
-              head -20 "$(Build.SourcesDirectory)/checkov-results.xml"
-            else
-              echo "checkov-results.xml does not exist"
-              find $(Build.SourcesDirectory) -name '*checkov*' 2>/dev/null || echo 'No checkov files found'
-            fi
-
       - task: PublishTestResults@2
         displayName: Publish Checkov Scan Results
         condition: succeededOrFailed()
@@ -64,22 +49,6 @@ jobs:
         inputs:
           targetType: inline
           script: eirctl tests
-
-      - task: Bash@3
-        displayName: Debug - Find Terraform Test Results
-        condition: succeededOrFailed()
-        inputs:
-          targetType: inline
-          script: |
-            echo "=== Terraform test results ==="
-            if [ -f "$(Build.SourcesDirectory)/terraform-test-results.xml" ]; then
-              echo "File exists, size: $(wc -c < "$(Build.SourcesDirectory)/terraform-test-results.xml") bytes"
-              echo "=== Content ==="
-              cat "$(Build.SourcesDirectory)/terraform-test-results.xml"
-            else
-              echo "terraform-test-results.xml does not exist"
-              find $(Build.SourcesDirectory) -name '*.xml' -type f 2>/dev/null || echo 'No XML files found'
-            fi
 
       - task: PublishTestResults@2
         displayName: Publish Terraform Test Results
