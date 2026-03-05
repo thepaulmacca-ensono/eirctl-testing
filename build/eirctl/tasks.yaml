@@ -116,17 +116,25 @@ tasks:
       $root = $PWD.Path
       cd $env:TF_FILE_LOCATION
       $filter = if ($env:TF_TEST_FILTER) { "-filter=$($env:TF_TEST_FILTER)" }
-      $tests = @(& terraform test -json $filter 2>&1 | ForEach-Object {
-        try { $_.ToString() | ConvertFrom-Json -EA Stop } catch {}
-      } | Where-Object { $_.type -eq "test_run" -and $_.status })
-      $fail = @($tests | Where-Object status -ne pass).Count
+      $raw = @(& terraform test -json $filter 2>&1 | ForEach-Object { $_.ToString() })
+      $raw | ForEach-Object { Write-Host "TF_JSON: $_" }
+      $tests = @($raw | ForEach-Object {
+        try { $_ | ConvertFrom-Json -EA Stop } catch {}
+      } | Where-Object { $_.type -eq 'test_run' -and ($_.status -or $_.test_progress.complete) })
+      $fail = @($tests | Where-Object {
+        $s = if ($_.status) { $_.status } else { $_.test_progress.complete.status }
+        $s -ne 'pass'
+      }).Count
       Write-Host "$($tests.Count) tests: $($tests.Count - $fail) passed, $fail failed."
       $e = [System.Security.SecurityElement]
       $x = '<?xml version="1.0" encoding="UTF-8"?>' +
         "<testsuites tests=`"$($tests.Count)`" failures=`"$fail`"><testsuite name=`"terraform`" tests=`"$($tests.Count)`" failures=`"$fail`">"
       $tests | ForEach-Object {
-        $x += "<testcase name=`"$($e::Escape($_.test_run))`" classname=`"$($e::Escape($_.test_file))`">"
-        if ($_.status -ne "pass") { $m = $e::Escape($_.'@message'); $x += "<failure message=`"$m`">$m</failure>" }
+        $name = if ($_.test_run -is [string]) { $_.test_run } else { $_.test_run.run }
+        $cls = if ($_.test_file) { $_.test_file } elseif ($_.test_run.path) { $_.test_run.path } else { 'terraform' }
+        $s = if ($_.status) { $_.status } else { $_.test_progress.complete.status }
+        $x += "<testcase name=`"$($e::Escape($name))`" classname=`"$($e::Escape($cls))`">"
+        if ($s -ne 'pass') { $m = $e::Escape($_.'@message'); $x += "<failure message=`"$m`">$m</failure>" }
         $x += "</testcase>"
       }
       $x += "</testsuite></testsuites>"
@@ -145,15 +153,7 @@ tasks:
         $pkg = if ($env:CHECKOV_VERSION) { "checkov==$env:CHECKOV_VERSION" } else { "checkov" }
         pip3 -q install -U $pkg
 
-        New-Item -ItemType Directory -Path checkov-results -Force | Out-Null
-        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,checkov-results
-
-        if (Test-Path checkov-results/results_junitxml.xml) {
-          Write-Host "Checkov JUnit XML written to: checkov-results/results_junitxml.xml"
-        } else {
-          Write-Warning "Checkov JUnit XML was not created at checkov-results/results_junitxml.xml"
-          Get-ChildItem . -Filter *.xml -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "Found XML: $($_.FullName)" }
-        }
+        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,checkov-results.xml
     required:
       env:
         - TF_FILE_LOCATION

@@ -41,19 +41,13 @@ jobs:
         inputs:
           targetType: inline
           script: |
-            echo "=== Checkov results path ==="
-            if [ -d "$(Build.SourcesDirectory)/checkov-results" ]; then
-              echo "checkov-results is a DIRECTORY"
-              ls -la "$(Build.SourcesDirectory)/checkov-results/"
-              if [ -f "$(Build.SourcesDirectory)/checkov-results/results_junitxml.xml" ]; then
-                echo "=== Content (first 50 lines) ==="
-                head -50 "$(Build.SourcesDirectory)/checkov-results/results_junitxml.xml"
-              fi
-            elif [ -f "$(Build.SourcesDirectory)/checkov-results" ]; then
-              echo "checkov-results is a FILE (not a directory!)"
-              head -50 "$(Build.SourcesDirectory)/checkov-results"
+            echo "=== Checkov results ==="
+            if [ -f "$(Build.SourcesDirectory)/checkov-results.xml" ]; then
+              echo "File exists, size: $(wc -c < "$(Build.SourcesDirectory)/checkov-results.xml") bytes"
+              head -20 "$(Build.SourcesDirectory)/checkov-results.xml"
             else
-              echo "checkov-results does not exist"
+              echo "checkov-results.xml does not exist"
+              find $(Build.SourcesDirectory) -name '*checkov*' 2>/dev/null || echo 'No checkov files found'
             fi
 
       - task: PublishTestResults@2
@@ -61,7 +55,7 @@ jobs:
         condition: succeededOrFailed()
         inputs:
           testResultsFormat: JUnit
-          testResultsFiles: '**/checkov-results/results_junitxml.xml'
+          testResultsFiles: '**/checkov-results.xml'
           searchFolder: $(Build.SourcesDirectory)
           testRunTitle: 'Checkov Scan - ${{ parameters.display_name }}'
 
