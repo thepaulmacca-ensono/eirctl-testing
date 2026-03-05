@@ -32,9 +32,9 @@ pipelines:
       depends_on: lint:terraform:validate
 
   tests:
-    - task: terraform:init
+    - task: terraform:init:false
     - task: terraform:tests
-      depends_on: terraform:init
+      depends_on: terraform:init:false
 
   tag:retain:
     - task: git:tag

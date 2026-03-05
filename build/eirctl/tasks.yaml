@@ -87,21 +87,29 @@ tasks:
     description: |
       Initialise Terraform
 
-      Set TF_BACKEND_FALSE=true to skip backend configuration (e.g., for CI validation)
+      Optionally pass backend arguments via TF_BACKEND_INIT.
+      Optionally set a workspace via ENVIRONMENT_NAME.
     command:
       - |
         $arguments = @()
-        if ($env:TF_BACKEND_FALSE -eq "true") {
-          $arguments += "-backend=false"
-        } elseif ($env:TF_BACKEND_INIT) {
+        if ($env:TF_BACKEND_INIT) {
           $arguments += $env:TF_BACKEND_INIT
         }
 
         Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $arguments -Debug
 
-        if ($env:TF_BACKEND_FALSE -ne "true" -and $env:ENVIRONMENT_NAME) {
+        if ($env:ENVIRONMENT_NAME) {
           Invoke-Terraform -Workspace -Path $env:TF_FILE_LOCATION -Arguments $env:ENVIRONMENT_NAME -Debug
         }
+    required:
+      env:
+        - TF_FILE_LOCATION
+
+  terraform:init:false:
+    context: infra
+    description: Initialise Terraform with False Backend (for CI validation)
+    command:
+      - Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments "-backend=false" -Debug
     required:
       env:
         - TF_FILE_LOCATION

@@ -19,9 +19,6 @@ variables:
   - name: is_main
     value: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
 
-
   # Terraform
   - name: TF_FILE_LOCATION
     value: "/eirctl/src"
-  - name: TF_BACKEND_FALSE
-    value: true
