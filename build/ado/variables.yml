@@ -18,8 +18,7 @@ variables:
     value: ubuntu-24.04
   - name: is_main
     value: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
-  - name: is_pre_release
-    value: $[ne(variables['Build.SourceBranch'], 'refs/heads/main')]
+
 
   # Terraform
   - name: TF_FILE_LOCATION

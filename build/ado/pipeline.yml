@@ -234,4 +234,5 @@ stages:
               PUBLISH_RELEASE: "true"
               GITHUB_TOKEN: $(GITHUB_TOKEN)
               ARTIFACTS_DIR: /eirctl/outputs/assets
-              PRERELEASE: $(is_pre_release)
+              ${{ if eq(parameters.pre_release, true) }}:
+                PRERELEASE: "true"
