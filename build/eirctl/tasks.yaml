@@ -145,6 +145,7 @@ tasks:
         $pkg = if ($env:CHECKOV_VERSION) { "checkov==$env:CHECKOV_VERSION" } else { "checkov" }
         pip3 -q install -U $pkg
 
+        New-Item -ItemType Directory -Path checkov-results -Force | Out-Null
         checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,checkov-results
 
         if (Test-Path checkov-results/results_junitxml.xml) {

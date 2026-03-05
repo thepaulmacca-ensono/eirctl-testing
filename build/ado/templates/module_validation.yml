@@ -41,11 +41,20 @@ jobs:
         inputs:
           targetType: inline
           script: |
-            echo "=== Searching for checkov result files ==="
-            find $(Build.SourcesDirectory) -path '*checkov*' -type f 2>/dev/null || echo 'No checkov files found'
-            echo ""
-            echo "=== All XML files in workspace ==="
-            find $(Build.SourcesDirectory) -name '*.xml' -type f 2>/dev/null || echo 'No XML files found'
+            echo "=== Checkov results path ==="
+            if [ -d "$(Build.SourcesDirectory)/checkov-results" ]; then
+              echo "checkov-results is a DIRECTORY"
+              ls -la "$(Build.SourcesDirectory)/checkov-results/"
+              if [ -f "$(Build.SourcesDirectory)/checkov-results/results_junitxml.xml" ]; then
+                echo "=== Content (first 50 lines) ==="
+                head -50 "$(Build.SourcesDirectory)/checkov-results/results_junitxml.xml"
+              fi
+            elif [ -f "$(Build.SourcesDirectory)/checkov-results" ]; then
+              echo "checkov-results is a FILE (not a directory!)"
+              head -50 "$(Build.SourcesDirectory)/checkov-results"
+            else
+              echo "checkov-results does not exist"
+            fi
 
       - task: PublishTestResults@2
         displayName: Publish Checkov Scan Results
@@ -68,8 +77,15 @@ jobs:
         inputs:
           targetType: inline
           script: |
-            echo "=== Searching for terraform test result files ==="
-            find $(Build.SourcesDirectory) -name 'terraform-test-results*' -type f 2>/dev/null || echo 'No terraform test result files found'
+            echo "=== Terraform test results ==="
+            if [ -f "$(Build.SourcesDirectory)/terraform-test-results.xml" ]; then
+              echo "File exists, size: $(wc -c < "$(Build.SourcesDirectory)/terraform-test-results.xml") bytes"
+              echo "=== Content ==="
+              cat "$(Build.SourcesDirectory)/terraform-test-results.xml"
+            else
+              echo "terraform-test-results.xml does not exist"
+              find $(Build.SourcesDirectory) -name '*.xml' -type f 2>/dev/null || echo 'No XML files found'
+            fi
 
       - task: PublishTestResults@2
         displayName: Publish Terraform Test Results
