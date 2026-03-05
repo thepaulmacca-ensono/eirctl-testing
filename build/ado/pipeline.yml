@@ -277,3 +277,5 @@ stages:
               targetType: inline
               script: |
                 eirctl tag:retain
+            env:
+              GITHUB_TOKEN: $(GITHUB_TOKEN)
