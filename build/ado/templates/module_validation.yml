@@ -35,6 +35,18 @@ jobs:
           targetType: inline
           script: eirctl scan
 
+      - task: Bash@3
+        displayName: Debug - Find Checkov Results
+        condition: succeededOrFailed()
+        inputs:
+          targetType: inline
+          script: |
+            echo "=== Searching for checkov result files ==="
+            find $(Build.SourcesDirectory) -path '*checkov*' -type f 2>/dev/null || echo 'No checkov files found'
+            echo ""
+            echo "=== All XML files in workspace ==="
+            find $(Build.SourcesDirectory) -name '*.xml' -type f 2>/dev/null || echo 'No XML files found'
+
       - task: PublishTestResults@2
         displayName: Publish Checkov Scan Results
         condition: succeededOrFailed()
@@ -49,6 +61,15 @@ jobs:
         inputs:
           targetType: inline
           script: eirctl tests
+
+      - task: Bash@3
+        displayName: Debug - Find Terraform Test Results
+        condition: succeededOrFailed()
+        inputs:
+          targetType: inline
+          script: |
+            echo "=== Searching for terraform test result files ==="
+            find $(Build.SourcesDirectory) -name 'terraform-test-results*' -type f 2>/dev/null || echo 'No terraform test result files found'
 
       - task: PublishTestResults@2
         displayName: Publish Terraform Test Results
