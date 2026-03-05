@@ -12,8 +12,7 @@ tasks:
       Retain an Azure DevOps pipeline run for a configurable number of years
 
       Set to 365 days (1 year) by default
-    command:
-      - |
+    command: |
         $retentionYears = if ($env:RETENTION_YEARS) { [int]$env:RETENTION_YEARS } else { 1 }
         $daysValid = 365 * $retentionYears
         $contentType = "application/json"
@@ -65,19 +64,23 @@ tasks:
   lint:terraform:tflint:
     context: infra
     description: Perform Terraform Linting using TFLint
-    command:
-      - |
-        tflint --init
-        tflint --chdir=$env:TF_FILE_LOCATION
+    command: |
+      tflint --init
+      New-Item -ItemType Directory -Path test-results -Force | Out-Null
+      tflint --chdir=$env:TF_FILE_LOCATION --format=junit | Out-File test-results/tflint-results.xml -Encoding UTF8
+      tflint --chdir=$env:TF_FILE_LOCATION
     required:
       env:
         - TF_FILE_LOCATION
 
   terraform:docs:
     context: infra
-    description: Generate documentation for the Terraform modules
-    command:
-      - terraform-docs -c .terraform-docs.yml $env:TF_FILE_LOCATION
+    description: Generate Terraform Module Documentation
+    command: |
+      terraform-docs $env:TF_FILE_LOCATION
+
+      git config --global --add safe.directory /eirctl
+      git diff --exit-code . ":(exclude)$env:TF_FILE_LOCATION/.terraform.lock.hcl"
     required:
       env:
         - TF_FILE_LOCATION
@@ -89,8 +92,7 @@ tasks:
 
       Optionally pass backend arguments via TF_BACKEND_INIT.
       Optionally set a workspace via ENVIRONMENT_NAME.
-    command:
-      - |
+    command: |
         $arguments = @()
         if ($env:TF_BACKEND_INIT) {
           $arguments += $env:TF_BACKEND_INIT
@@ -108,8 +110,9 @@ tasks:
   terraform:init:false:
     context: infra
     description: Initialise Terraform with False Backend (for CI validation)
-    command:
-      - Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments "-backend=false" -Debug
+    command: |
+      cd $env:TF_FILE_LOCATION
+      terraform init -backend=false
     required:
       env:
         - TF_FILE_LOCATION
@@ -148,8 +151,7 @@ tasks:
   scan:terraform:checkov:
     context: infra
     description: Perform Terraform Static Code Analysis using Checkov
-    command:
-      - |
+    command: |
         $pkg = if ($env:CHECKOV_VERSION) { "checkov==$env:CHECKOV_VERSION" } else { "checkov" }
         pip3 -q install -U $pkg
 

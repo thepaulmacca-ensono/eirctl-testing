@@ -29,6 +29,15 @@ jobs:
           targetType: inline
           script: eirctl terraform:lint
 
+      - task: PublishTestResults@2
+        displayName: Publish TFLint Results
+        condition: succeededOrFailed()
+        inputs:
+          testResultsFormat: JUnit
+          testResultsFiles: '**/test-results/tflint-results.xml'
+          searchFolder: $(Build.SourcesDirectory)
+          testRunTitle: 'TFLint - ${{ parameters.display_name }}'
+
       - task: Bash@3
         displayName: Run Checkov Scan
         inputs:
