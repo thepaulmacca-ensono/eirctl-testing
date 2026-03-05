@@ -235,13 +235,17 @@ tasks:
         exit 1
       }
 
-      $repoFullName = if ($env:GITHUB_REPOSITORY) { $env:GITHUB_REPOSITORY } else { $env:BUILD_REPOSITORY_NAME }
-      if (-not $repoFullName) {
-        Write-Error "GITHUB_REPOSITORY or BUILD_REPOSITORY_NAME environment variable is required"
+      $repoUri = if ($env:BUILD_REPOSITORY_URI) {
+        $env:BUILD_REPOSITORY_URI
+      } elseif ($env:GITHUB_REPOSITORY) {
+        "https://github.com/$($env:GITHUB_REPOSITORY)"
+      } else {
+        Write-Error "BUILD_REPOSITORY_URI or GITHUB_REPOSITORY environment variable is required"
         exit 1
       }
 
-      git remote set-url origin "https://x-access-token:$($env:GITHUB_TOKEN)@github.com/$repoFullName.git"
+      $authenticatedUri = $repoUri -replace 'https://', "https://x-access-token:$($env:GITHUB_TOKEN)@"
+      git remote set-url origin $authenticatedUri
 
       $tagName = "v$version"
       Write-Host "Tagging commit $commitId as $tagName"
