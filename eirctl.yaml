@@ -36,8 +36,11 @@ pipelines:
     - task: terraform:tests
       depends_on: terraform:init
 
+  # tag:
+  #   - task: git:tag
+  #   - task: ado:pipeline:retain
+  #     depends_on:
+  #       - git:tag
+
   release:
-    - task: ado:build:number
     - task: github:release
-      depends_on:
-        - ado:build:number

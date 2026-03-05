@@ -1,6 +1,5 @@
 tasks:
   # ADO
-  ## Pipelines
   ado:build:number:
     context: powershell
     description: Update the Build Number in Azure DevOps
@@ -213,7 +212,34 @@ tasks:
       Write-Host ("Creating package: {0}" -f $zipPath)
       Compress-Archive -Path outputs/module/* -DestinationPath $zipPath -Force
 
-  # GitHub
+  # Git
+  git:tag:
+    context: powershell
+    description: |
+      Tag a commit and push to origin.
+
+      Resolves version from BUILD_BUILDNUMBER (ADO) or GITHUB_RUN_NUMBER (GHA).
+      Resolves commit SHA from BUILD_SOURCEVERSION (ADO) or GITHUB_SHA (GHA).
+    command: |
+      git config --global --add safe.directory /eirctl
+
+      $version = if ($env:BUILD_BUILDNUMBER) { $env:BUILD_BUILDNUMBER } else { $env:GITHUB_RUN_NUMBER }
+      if (-not $version) {
+        Write-Error "BUILD_BUILDNUMBER or GITHUB_RUN_NUMBER environment variable is required"
+        exit 1
+      }
+
+      $commitId = if ($env:BUILD_SOURCEVERSION) { $env:BUILD_SOURCEVERSION } else { $env:GITHUB_SHA }
+      if (-not $commitId) {
+        Write-Error "BUILD_SOURCEVERSION or GITHUB_SHA environment variable is required"
+        exit 1
+      }
+
+      $tagName = "v$version"
+      Write-Host "Tagging commit $commitId as $tagName"
+      git tag $tagName $commitId
+      git push origin $tagName
+
   ## Release
   github:release:
     context: powershell
