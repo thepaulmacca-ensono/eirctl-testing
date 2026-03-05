@@ -29,3 +29,14 @@ resource "azurerm_log_analytics_workspace" "management" {
   sku                 = "PerGB2018"
   retention_in_days   = 30
 }
+
+# Storage Account - deliberately insecure for checkov testing
+resource "azurerm_storage_account" "management" {
+  name                          = "stmanagement"
+  location                      = azurerm_resource_group.management.location
+  resource_group_name           = azurerm_resource_group.management.name
+  account_tier                  = "Standard"
+  account_replication_type      = "LRS"
+  https_traffic_only_enabled    = false
+  allow_nested_items_to_be_public = true
+}
