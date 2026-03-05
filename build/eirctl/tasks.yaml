@@ -15,7 +15,7 @@ tasks:
       Set to 365 days (1 year) by default
     command:
       - |
-        $retentionYears = [int]$env:RETENTION_YEARS
+        $retentionYears = if ($env:RETENTION_YEARS) { [int]$env:RETENTION_YEARS } else { 1 }
         $daysValid = 365 * $retentionYears
         $contentType = "application/json"
         $headers = @{ Authorization = "Bearer $env:ADO_ACCESS_TOKEN" }
@@ -30,6 +30,9 @@ tasks:
         $uri = "$env:SYSTEM_COLLECTIONURI$env:SYSTEM_TEAMPROJECT/_apis/build/retention/leases?api-version=6.0-preview.1"
         $response = Invoke-RestMethod -uri $uri -method POST -Headers $headers -ContentType $contentType -Body $request
         Write-Host "Pipeline run successfully retained for $retentionYears year(s)."
+    required:
+      env:
+        - ADO_ACCESS_TOKEN
 
   # Linting
   lint:yaml:
@@ -47,29 +50,38 @@ tasks:
     description: Perform Terraform Format Check
     command:
       - Invoke-Terraform -Format -Path $env:TF_FILE_LOCATION -Debug
+    required:
+      env:
+        - TF_FILE_LOCATION
 
   lint:terraform:validate:
     context: infra
     description: Perform Terraform Validation
     command:
       - Invoke-Terraform -Validate -Path $env:TF_FILE_LOCATION -Debug
+    required:
+      env:
+        - TF_FILE_LOCATION
 
   lint:terraform:tflint:
     context: infra
     description: Perform Terraform Linting using TFLint
     command:
       - |
-        tflint --version
-        Write-Host ("Path: {0}" -f $env:TF_FILE_LOCATION)
-
         tflint --init
         tflint --chdir=$env:TF_FILE_LOCATION
+    required:
+      env:
+        - TF_FILE_LOCATION
 
   terraform:docs:
     context: infra
     description: Generate documentation for the Terraform modules
     command:
       - terraform-docs -c .terraform-docs.yml $env:TF_FILE_LOCATION
+    required:
+      env:
+        - TF_FILE_LOCATION
 
   terraform:init:
     context: infra
@@ -91,27 +103,37 @@ tasks:
         if ($env:TF_BACKEND_FALSE -ne "true" -and $env:ENVIRONMENT_NAME) {
           Invoke-Terraform -Workspace -Path $env:TF_FILE_LOCATION -Arguments $env:ENVIRONMENT_NAME -Debug
         }
+    required:
+      env:
+        - TF_FILE_LOCATION
 
   terraform:tests:
     context: infra
     description: |
-      Run Terraform Tests
-
+      Run Terraform Tests and produce JUnit XML at /eirctl/terraform-test-results.xml
       Set TF_TEST_FILTER to run a specific test file (e.g., TF_TEST_FILTER=tests/main.tftest.hcl)
     command: |
       cd $env:TF_FILE_LOCATION
-      $junitPath = "/eirctl/terraform-test-results.xml"
-      if ($env:TF_TEST_FILTER) {
-        terraform test -junit-xml=$junitPath -filter="$env:TF_TEST_FILTER"
-      } else {
-        terraform test -junit-xml=$junitPath
+      $filter = if ($env:TF_TEST_FILTER) { "-filter=$($env:TF_TEST_FILTER)" }
+      $tests = @(& terraform test -json $filter 2>&1 | ForEach-Object {
+        try { $_.ToString() | ConvertFrom-Json -EA Stop } catch {}
+      } | Where-Object { $_.type -eq "test_run" -and $_.status })
+      $fail = @($tests | Where-Object status -ne pass).Count
+      Write-Host "$($tests.Count) tests: $($tests.Count - $fail) passed, $fail failed."
+      $e = [System.Security.SecurityElement]
+      $x = '<?xml version="1.0" encoding="UTF-8"?>' +
+        "<testsuites tests=`"$($tests.Count)`" failures=`"$fail`"><testsuite name=`"terraform`" tests=`"$($tests.Count)`" failures=`"$fail`">"
+      $tests | ForEach-Object {
+        $x += "<testcase name=`"$($e::Escape($_.test_run))`" classname=`"$($e::Escape($_.test_file))`">"
+        if ($_.status -ne "pass") { $m = $e::Escape($_.'@message'); $x += "<failure message=`"$m`">$m</failure>" }
+        $x += "</testcase>"
       }
-      if (Test-Path $junitPath) {
-        Write-Host "JUnit XML written to: $junitPath"
-      } else {
-        Write-Warning "terraform-test-results.xml was NOT created — -junit-xml may not be supported by this Terraform version"
-        Get-ChildItem /eirctl -Filter *.xml -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "Found XML: $($_.FullName)" }
-      }
+      $x += "</testsuite></testsuites>"
+      $x | Out-File /eirctl/terraform-test-results.xml -Encoding UTF8
+      if ($fail) { exit 1 }
+    required:
+      env:
+        - TF_FILE_LOCATION
 
   # Scanning
   scan:terraform:checkov:
@@ -119,19 +141,20 @@ tasks:
     description: Perform Terraform Static Code Analysis using Checkov
     command:
       - |
-        Write-Host ("Path: {0}" -f $env:TF_FILE_LOCATION)
+        $pkg = if ($env:CHECKOV_VERSION) { "checkov==$env:CHECKOV_VERSION" } else { "checkov" }
+        pip3 -q install -U $pkg
 
-        if ([string]::IsNullOrEmpty($env:CHECKOV_VERSION)) {
-          pip3 -q install -U checkov
+        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,/eirctl/checkov-results
+
+        if (Test-Path /eirctl/checkov-results/results_junitxml.xml) {
+          Write-Host "Checkov JUnit XML written to: /eirctl/checkov-results/results_junitxml.xml"
         } else {
-          $currentVersion = (checkov -v 2>&1) -match '\d+(\.\d+)+' | Out-Null; $matches[0]
-          if ($currentVersion -ne $env:CHECKOV_VERSION) {
-            Write-Host ("Installing Checkov version {0}" -f $env:CHECKOV_VERSION)
-            pip3 -q install -U checkov==$env:CHECKOV_VERSION
-          }
+          Write-Warning "Checkov JUnit XML was not created at /eirctl/checkov-results/results_junitxml.xml"
+          Get-ChildItem /eirctl -Filter *.xml -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "Found XML: $($_.FullName)" }
         }
-
-        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,checkov-results
+    required:
+      env:
+        - TF_FILE_LOCATION
 
   # Documentation
   docs:docbook:
@@ -158,13 +181,16 @@ tasks:
     description: Clean the outputs folder
     command: |
       Remove-Item -Path outputs -Recurse -Force -ErrorAction SilentlyContinue
-      if (!(Test-Path -Path outputs/module)) { (New-Item -ItemType Directory -Path outputs/module) }
+      New-Item -ItemType Directory -Path outputs/module -Force | Out-Null
 
   build:copy:
     context: powershell
     description: Copy the Terraform Module into the outputs/module folder
     command: |
       Copy-Item -Path ${env:TF_FILE_LOCATION}/* -Destination outputs/module/ -Recurse -Force -Exclude tests,.terraform,.terraform.lock.hcl
+    required:
+      env:
+        - TF_FILE_LOCATION
 
   build:package:
     context: powershell
@@ -198,5 +224,9 @@ tasks:
     description: Publish a Release to GitHub
     command: |
       $repo_name = ($env:REPOSITORY -split '/')[-1]
-      Write-Host "Publish-GitHubRelease -version $env:BUILD_BUILDNUMBER -commitId $env:COMMIT_ID -apikey *** -artifactsDir $env:ARTIFACTS_DIR -Owner $env:OWNER -repository $repo_name -generateReleaseNotes `$true"
       Publish-GitHubRelease -version $env:BUILD_BUILDNUMBER -commitId $env:COMMIT_ID -apikey $env:GITHUB_TOKEN -artifactsDir $env:ARTIFACTS_DIR -Owner $env:OWNER -repository $repo_name -generateReleaseNotes $true
+    required:
+      env:
+        - GITHUB_TOKEN
+        - REPOSITORY
+        - OWNER

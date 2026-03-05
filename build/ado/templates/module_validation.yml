@@ -41,6 +41,7 @@ jobs:
         inputs:
           testResultsFormat: JUnit
           testResultsFiles: '**/checkov-results/results_junitxml.xml'
+          searchFolder: $(Build.SourcesDirectory)
           testRunTitle: 'Checkov Scan - ${{ parameters.display_name }}'
 
       - task: Bash@3
@@ -55,4 +56,5 @@ jobs:
         inputs:
           testResultsFormat: JUnit
           testResultsFiles: '**/terraform-test-results.xml'
+          searchFolder: $(Build.SourcesDirectory)
           testRunTitle: 'Terraform Tests - ${{ parameters.display_name }}'
