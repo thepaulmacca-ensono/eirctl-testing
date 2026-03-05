@@ -1,7 +1,7 @@
 contexts:
   asciidoc:
     container:
-      name: ensono/eir-asciidoctor
+      name: ensono/eir-asciidoctor:1.2.45
       shell: pwsh
       shell_args:
         - -Command
@@ -12,7 +12,7 @@ contexts:
 
   infra:
     container:
-      name: ensono/eir-infrastructure
+      name: ensono/eir-infrastructure:1.2.45
       shell: pwsh
       shell_args:
         - -Command
@@ -23,7 +23,7 @@ contexts:
 
   powershell:
     container:
-      name: ensono/eir-foundation-powershell
+      name: ensono/eir-foundation-powershell:1.2.45
       shell: pwsh
       shell_args:
         - -Command
