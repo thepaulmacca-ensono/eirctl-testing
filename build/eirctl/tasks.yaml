@@ -130,7 +130,8 @@ tasks:
         $x += "</testcase>"
       }
       $x += "</testsuite></testsuites>"
-      $x | Out-File "$root/terraform-test-results.xml" -Encoding UTF8
+      New-Item -ItemType Directory -Path "$root/test-results" -Force | Out-Null
+      $x | Out-File "$root/test-results/terraform-test-results.xml" -Encoding UTF8
       if ($fail) { exit 1 }
     required:
       env:
@@ -145,7 +146,8 @@ tasks:
         $pkg = if ($env:CHECKOV_VERSION) { "checkov==$env:CHECKOV_VERSION" } else { "checkov" }
         pip3 -q install -U $pkg
 
-        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,checkov-results.xml
+        New-Item -ItemType Directory -Path test-results -Force | Out-Null
+        checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,test-results/checkov-results.xml --soft-fail
     required:
       env:
         - TF_FILE_LOCATION
@@ -215,12 +217,29 @@ tasks:
   ## Release
   github:release:
     context: powershell
-    description: Publish a Release to GitHub
+    description: |
+      Publish a Release to GitHub
+
+      Resolves version from BUILD_BUILDNUMBER or GITHUB_RUN_NUMBER.
+      Resolves commit ID from COMMIT_ID or GITHUB_SHA.
     command: |
-      $repo_name = ($env:REPOSITORY -split '/')[-1]
-      Publish-GitHubRelease -version $env:BUILD_BUILDNUMBER -commitId $env:COMMIT_ID -apikey $env:GITHUB_TOKEN -artifactsDir $env:ARTIFACTS_DIR -Owner $env:OWNER -repository $repo_name -generateReleaseNotes $true
+      $repoFullName = if ($env:GITHUB_REPOSITORY) { $env:GITHUB_REPOSITORY } else { $env:BUILD_REPOSITORY_NAME }
+      if (-not $repoFullName) {
+        Write-Error "GITHUB_REPOSITORY or BUILD_REPOSITORY_NAME environment variable is required"
+        exit 1
+      }
+      $owner = ($repoFullName -split '/')[0]
+      $repo = ($repoFullName -split '/')[-1]
+
+      $version = if ($env:BUILD_BUILDNUMBER) { $env:BUILD_BUILDNUMBER } else { $env:GITHUB_RUN_NUMBER }
+      if (-not $version) {
+        Write-Error "BUILD_BUILDNUMBER or GITHUB_RUN_NUMBER environment variable is required"
+        exit 1
+      }
+
+      $commitId = if ($env:COMMIT_ID) { $env:COMMIT_ID } elseif ($env:BUILD_SOURCEVERSION) { $env:BUILD_SOURCEVERSION } else { $env:GITHUB_SHA }
+
+      Publish-GitHubRelease -version $version -commitId $commitId -apikey $env:GITHUB_TOKEN -artifactsDir $env:ARTIFACTS_DIR -Owner $owner -repository $repo -generateReleaseNotes $true
     required:
       env:
         - GITHUB_TOKEN
-        - REPOSITORY
-        - OWNER

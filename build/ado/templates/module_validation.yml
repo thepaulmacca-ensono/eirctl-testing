@@ -40,7 +40,7 @@ jobs:
         condition: succeededOrFailed()
         inputs:
           testResultsFormat: JUnit
-          testResultsFiles: '**/checkov-results.xml'
+          testResultsFiles: '**/test-results/checkov-results.xml'
           searchFolder: $(Build.SourcesDirectory)
           testRunTitle: 'Checkov Scan - ${{ parameters.display_name }}'
 
@@ -55,6 +55,6 @@ jobs:
         condition: succeededOrFailed()
         inputs:
           testResultsFormat: JUnit
-          testResultsFiles: '**/terraform-test-results.xml'
+          testResultsFiles: '**/test-results/terraform-test-results.xml'
           searchFolder: $(Build.SourcesDirectory)
           testRunTitle: 'Terraform Tests - ${{ parameters.display_name }}'

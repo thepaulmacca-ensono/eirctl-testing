@@ -235,12 +235,7 @@ stages:
               script: |
                 eirctl release
             env:
-              STAGE: Release
               PUBLISH_RELEASE: "true"
               GITHUB_TOKEN: $(GITHUB_TOKEN)
-              OWNER: thepaulmacca-ensono
-              REPOSITORY: $(Build.Repository.Name)
-              BUILD_BUILDNUMBER: $(Build.BuildNumber)
-              COMMIT_ID: $(Build.SourceVersion)
               ARTIFACTS_DIR: /eirctl/outputs/assets
               PRERELEASE: $(is_pre_release)
