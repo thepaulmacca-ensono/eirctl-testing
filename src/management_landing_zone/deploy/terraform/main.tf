@@ -16,7 +16,6 @@ provider "azurerm" {
 }
 
 # Management Resource Group
-#
 resource "azurerm_resource_group" "management" {
   name     = "rg-management"
   location = "uksouth"
