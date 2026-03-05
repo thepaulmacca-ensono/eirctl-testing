@@ -12,7 +12,7 @@ parameters:
     default: false
 
   - name: modules
-    displayName: Modules to Validate
+    displayName: Modules to Validate/Publish
     type: object
     default:
       - name: management_landing_zone
