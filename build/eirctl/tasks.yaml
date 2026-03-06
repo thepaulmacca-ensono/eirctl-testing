@@ -11,8 +11,13 @@ tasks:
     description: |
       Retain an Azure DevOps pipeline run for a configurable number of years
 
-      Set to 365 days (1 year) by default
+      Set to 365 days (1 year) by default.
+      Skips gracefully when not running in Azure DevOps.
     command: |
+      if (-not $env:ADO_ACCESS_TOKEN) {
+        Write-Host "ADO_ACCESS_TOKEN not set — skipping pipeline retention (not running in Azure DevOps)"
+        return
+      }
       $retentionYears = if ($env:RETENTION_YEARS) { [int]$env:RETENTION_YEARS } else { 1 }
       $daysValid = 365 * $retentionYears
       $contentType = "application/json"
@@ -28,9 +33,6 @@ tasks:
       $uri = "$env:SYSTEM_COLLECTIONURI$env:SYSTEM_TEAMPROJECT/_apis/build/retention/leases?api-version=6.0-preview.1"
       $response = Invoke-RestMethod -uri $uri -method POST -Headers $headers -ContentType $contentType -Body $request
       Write-Host "Pipeline run successfully retained for $retentionYears year(s)."
-    required:
-      env:
-        - ADO_ACCESS_TOKEN
 
   # Linting
   lint:yaml:
@@ -126,11 +128,16 @@ tasks:
       $root = $PWD.Path
       cd $env:TF_FILE_LOCATION
       $filter = if ($env:TF_TEST_FILTER) { "-filter=$($env:TF_TEST_FILTER)" }
-      $tests = @(& terraform test -json $filter 2>&1 | ForEach-Object {
+      $allLines = @(& terraform test -json $filter 2>&1)
+      $allLines | ForEach-Object {
+        try { $_.ToString() | ConvertFrom-Json -EA Stop } catch {}
+      } | Where-Object { $_.type -eq 'test_summary' -or $_.type -eq 'test_file' -or $_.type -eq 'test_run' } | ForEach-Object {
+        Write-Host $_.'@message'
+      }
+      $tests = @($allLines | ForEach-Object {
         try { $_.ToString() | ConvertFrom-Json -EA Stop } catch {}
       } | Where-Object { $_.type -eq 'test_run' -and $_.test_run.progress -eq 'complete' })
       $fail = @($tests | Where-Object { $_.test_run.status -ne 'pass' }).Count
-      Write-Host "$($tests.Count) tests: $($tests.Count - $fail) passed, $fail failed."
       $e = [System.Security.SecurityElement]
       $x = '<?xml version="1.0" encoding="UTF-8"?>' +
         "<testsuites tests=`"$($tests.Count)`" failures=`"$fail`"><testsuite name=`"terraform`" tests=`"$($tests.Count)`" failures=`"$fail`">"

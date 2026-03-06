@@ -279,3 +279,4 @@ stages:
                 eirctl tag:retain
             env:
               GITHUB_TOKEN: $(GITHUB_TOKEN)
+              ADO_ACCESS_TOKEN: $(System.AccessToken)
