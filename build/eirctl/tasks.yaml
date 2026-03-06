@@ -18,15 +18,15 @@ tasks:
       $contentType = "application/json"
       $headers = @{ Authorization = "Bearer $env:ADO_ACCESS_TOKEN" }
       $rawRequest = @{
-          daysValid       = $daysValid
-          definitionId    = $env:SYSTEM_DEFINITIONID
-          ownerId         = "User:$env:BUILD_REQUESTEDFORID"
-          protectPipeline = $false
-          runId           = $env:BUILD_BUILDID
+        daysValid       = $daysValid
+        definitionId    = $env:SYSTEM_DEFINITIONID
+        ownerId         = "User:$env:BUILD_REQUESTEDFORID"
+        protectPipeline = $false
+        runId           = $env:BUILD_BUILDID
       }
       $request = ConvertTo-Json @($rawRequest)
       $uri = "$env:SYSTEM_COLLECTIONURI$env:SYSTEM_TEAMPROJECT/_apis/build/retention/leases?api-version=6.0-preview.1"
-      $response = Invoke-RestMethod -uri $uri -method POST -Headers $headers -ContentType $contentType -Body $request
+      Invoke-RestMethod -uri $uri -method POST -Headers $headers -ContentType $contentType -Body $request | Out-Null
       Write-Host "Pipeline run successfully retained for $retentionYears year(s)."
     required:
       env:
@@ -120,17 +120,21 @@ tasks:
   terraform:tests:
     context: infra
     description: |
-      Run Terraform Tests and produce JUnit XML at terraform-test-results.xml
+      Run Terraform tests
+
       Set TF_TEST_FILTER to run a specific test file (e.g., TF_TEST_FILTER=tests/main.tftest.hcl)
     command: |
       $root = $PWD.Path
-      cd $env:TF_FILE_LOCATION
+      Set-Location $env:TF_FILE_LOCATION
       $filter = if ($env:TF_TEST_FILTER) { "-filter=$($env:TF_TEST_FILTER)" }
-      terraform test $filter
-      $exitCode = $LASTEXITCODE
       $allLines = @(& terraform test -json $filter 2>&1)
+      $allLines | ForEach-Object {
+        try { $_.ToString() | ConvertFrom-Json -EA Stop } catch { $null }
+      } | Where-Object { $_.type -eq 'test_summary' -or $_.type -eq 'test_file' -or $_.type -eq 'test_run' } | ForEach-Object {
+        Write-Host $_.'@message'
+      }
       $tests = @($allLines | ForEach-Object {
-        try { $_.ToString() | ConvertFrom-Json -EA Stop } catch {}
+        try { $_.ToString() | ConvertFrom-Json -EA Stop } catch { $null }
       } | Where-Object { $_.type -eq 'test_run' -and $_.test_run.progress -eq 'complete' })
       $fail = @($tests | Where-Object { $_.test_run.status -ne 'pass' }).Count
       $e = [System.Security.SecurityElement]
@@ -144,7 +148,7 @@ tasks:
       $x += "</testsuite></testsuites>"
       New-Item -ItemType Directory -Path "$root/test-results" -Force | Out-Null
       $x | Out-File "$root/test-results/terraform-test-results.xml" -Encoding UTF8
-      if ($exitCode -ne 0) { exit 1 }
+      if ($fail) { exit 1 }
     required:
       env:
         - TF_FILE_LOCATION
