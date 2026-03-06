@@ -1,11 +1,4 @@
 # Management Landing Zone Module
-
-variable "unused_tflint_test" {
-  description = "Unused variable to trigger tflint failure"
-  type        = string
-  default     = "this-should-fail-tflint"
-}
-
 terraform {
   required_version = "~> 1.12"
 
