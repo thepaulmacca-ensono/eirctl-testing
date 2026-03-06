@@ -165,15 +165,20 @@ tasks:
 
   lint:terraform:tflint:
     context: infra
-    description: Perform Terraform Linting using TFLint
+    description: |
+      Perform Terraform Linting using TFLint
+
+      Set TFLINT_CONFIG to the path of the TFLint configuration file.
     command: |
-      tflint --init --chdir=$env:TF_FILE_LOCATION
+      $configArg = if ($env:TFLINT_CONFIG) { "--config=$PWD/$env:TFLINT_CONFIG" }
+      tflint --init --chdir=$env:TF_FILE_LOCATION $configArg
       New-Item -ItemType Directory -Path test-results -Force | Out-Null
-      tflint --chdir=$env:TF_FILE_LOCATION --format=junit | Out-File test-results/tflint-results.xml -Encoding UTF8
-      tflint --chdir=$env:TF_FILE_LOCATION
+      tflint --chdir=$env:TF_FILE_LOCATION $configArg --format=junit | Out-File test-results/tflint-results.xml -Encoding UTF8
+      tflint --chdir=$env:TF_FILE_LOCATION $configArg
     required:
       env:
         - TF_FILE_LOCATION
+        - TFLINT_CONFIG
 
   terraform:docs:
     context: infra

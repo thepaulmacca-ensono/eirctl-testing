@@ -15,6 +15,7 @@ jobs:
     condition: ${{ parameters.run_condition }}
     variables:
       TF_FILE_LOCATION: "src/${{ parameters.module_name }}/deploy/terraform"
+      TFLINT_CONFIG: "src/${{ parameters.module_name }}/.tflint.hcl"
     steps:
       - checkout: self
         fetchDepth: 1
