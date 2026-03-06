@@ -37,6 +37,8 @@ jobs:
           testResultsFiles: '**/test-results/tflint-results.xml'
           searchFolder: $(Build.SourcesDirectory)
           testRunTitle: 'TFLint - ${{ parameters.display_name }}'
+          failTaskOnFailedTests: true
+          failTaskOnMissingResultsFile: true
 
       - task: Bash@3
         displayName: Run Checkov Scan
@@ -52,6 +54,8 @@ jobs:
           testResultsFiles: '**/test-results/checkov-results.xml'
           searchFolder: $(Build.SourcesDirectory)
           testRunTitle: 'Checkov Scan - ${{ parameters.display_name }}'
+          failTaskOnFailedTests: true
+          failTaskOnMissingResultsFile: true
 
       - task: Bash@3
         displayName: Run Terraform Unit Tests
@@ -67,3 +71,5 @@ jobs:
           testResultsFiles: '**/test-results/terraform-test-results.xml'
           searchFolder: $(Build.SourcesDirectory)
           testRunTitle: 'Terraform Tests - ${{ parameters.display_name }}'
+          failTaskOnFailedTests: true
+          failTaskOnMissingResultsFile: true

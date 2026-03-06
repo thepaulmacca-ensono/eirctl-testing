@@ -73,6 +73,23 @@ stages:
               script: |
                 eirctl lint:yaml
 
+          - task: Bash@3
+            displayName: Lint PowerShell in Task Definitions
+            inputs:
+              targetType: inline
+              script: |
+                eirctl lint:powershell
+
+          - task: PublishTestResults@2
+            displayName: Publish PSScriptAnalyzer Results
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: JUnit
+              testResultsFiles: test-results/psscriptanalyzer-results.xml
+              testRunTitle: PSScriptAnalyzer
+              failTaskOnFailedTests: true
+              failTaskOnMissingResultsFile: true
+
       - job: Detect_Changes
         displayName: Detect Module Changes
         steps:
