@@ -11,13 +11,8 @@ tasks:
     description: |
       Retain an Azure DevOps pipeline run for a configurable number of years
 
-      Set to 365 days (1 year) by default.
-      Skips gracefully when not running in Azure DevOps.
+      Set to 365 days (1 year) by default
     command: |
-      if (-not $env:ADO_ACCESS_TOKEN) {
-        Write-Host "ADO_ACCESS_TOKEN not set — skipping pipeline retention (not running in Azure DevOps)"
-        return
-      }
       $retentionYears = if ($env:RETENTION_YEARS) { [int]$env:RETENTION_YEARS } else { 1 }
       $daysValid = 365 * $retentionYears
       $contentType = "application/json"
@@ -33,6 +28,9 @@ tasks:
       $uri = "$env:SYSTEM_COLLECTIONURI$env:SYSTEM_TEAMPROJECT/_apis/build/retention/leases?api-version=6.0-preview.1"
       $response = Invoke-RestMethod -uri $uri -method POST -Headers $headers -ContentType $contentType -Body $request
       Write-Host "Pipeline run successfully retained for $retentionYears year(s)."
+    required:
+      env:
+        - ADO_ACCESS_TOKEN
 
   # Linting
   lint:yaml:
@@ -128,12 +126,9 @@ tasks:
       $root = $PWD.Path
       cd $env:TF_FILE_LOCATION
       $filter = if ($env:TF_TEST_FILTER) { "-filter=$($env:TF_TEST_FILTER)" }
+      terraform test $filter
+      $exitCode = $LASTEXITCODE
       $allLines = @(& terraform test -json $filter 2>&1)
-      $allLines | ForEach-Object {
-        try { $_.ToString() | ConvertFrom-Json -EA Stop } catch {}
-      } | Where-Object { $_.type -eq 'test_summary' -or $_.type -eq 'test_file' -or $_.type -eq 'test_run' } | ForEach-Object {
-        Write-Host $_.'@message'
-      }
       $tests = @($allLines | ForEach-Object {
         try { $_.ToString() | ConvertFrom-Json -EA Stop } catch {}
       } | Where-Object { $_.type -eq 'test_run' -and $_.test_run.progress -eq 'complete' })
@@ -149,7 +144,7 @@ tasks:
       $x += "</testsuite></testsuites>"
       New-Item -ItemType Directory -Path "$root/test-results" -Force | Out-Null
       $x | Out-File "$root/test-results/terraform-test-results.xml" -Encoding UTF8
-      if ($fail) { exit 1 }
+      if ($exitCode -ne 0) { exit 1 }
     required:
       env:
         - TF_FILE_LOCATION
