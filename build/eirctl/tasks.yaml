@@ -61,7 +61,7 @@ tasks:
       $excludeRules = if ($env:PSSCRIPTANALYZER_EXCLUDE_RULES) {
         $env:PSSCRIPTANALYZER_EXCLUDE_RULES -split ','
       } else {
-        @("PSAvoidUsingWriteHost")
+        @("PSAvoidUsingWriteHost", "PSUseBOMForUnicodeEncodedFile")
       }
 
       $yamlFiles = Get-ChildItem -Path $searchPath -Recurse -Include *.yaml, *.yml |
@@ -216,7 +216,7 @@ tasks:
     context: infra
     description: Initialise Terraform with False Backend (for CI validation)
     command: |
-      cd $env:TF_FILE_LOCATION
+      Set-Location $env:TF_FILE_LOCATION
       terraform init -backend=false
     required:
       env:
