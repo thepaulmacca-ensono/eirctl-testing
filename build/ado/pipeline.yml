@@ -85,8 +85,9 @@ stages:
             condition: succeededOrFailed()
             inputs:
               testResultsFormat: JUnit
-              testResultsFiles: test-results/psscriptanalyzer-results.xml
-              testRunTitle: PSScriptAnalyzer
+              testResultsFiles: '**/test-results/psscriptanalyzer-results.xml'
+              searchFolder: $(Build.SourcesDirectory)
+              testRunTitle: 'PSScriptAnalyzer Results'
               failTaskOnFailedTests: true
               failTaskOnMissingResultsFile: true
 
