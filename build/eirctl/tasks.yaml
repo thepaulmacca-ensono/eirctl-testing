@@ -54,9 +54,6 @@ tasks:
       to exclude (default: PSAvoidUsingWriteHost).
       Set PSSCRIPTANALYZER_PATH to override the search directory (default: current directory).
     command: |
-      Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -Repository PSGallery -ErrorAction Stop
-      Install-Module -Name powershell-yaml -Force -Scope CurrentUser -Repository PSGallery -ErrorAction Stop
-
       $searchPath = if ($env:PSSCRIPTANALYZER_PATH) { $env:PSSCRIPTANALYZER_PATH } else { "." }
       $excludeRules = if ($env:PSSCRIPTANALYZER_EXCLUDE_RULES) {
         $env:PSSCRIPTANALYZER_EXCLUDE_RULES -split ','
