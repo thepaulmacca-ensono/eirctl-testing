@@ -10,6 +10,6 @@ plugin "terraform" {
     source  = "github.com/terraform-linters/tflint-ruleset-terraform"
 }
 
-rule "terraform_standard_module_structure" {
+rule "terraform_unused_declarations" {
   enabled = true
 }
