@@ -231,31 +231,9 @@ tasks:
 
       Set TF_TEST_FILTER to run a specific test file (e.g., TF_TEST_FILTER=tests/main.tftest.hcl)
     command: |
-      $root = $PWD.Path
-      Set-Location $env:TF_FILE_LOCATION
+      New-Item -ItemType Directory -Path test-results -Force | Out-Null
       $filter = if ($env:TF_TEST_FILTER) { "-filter=$($env:TF_TEST_FILTER)" }
-      $allLines = @(& terraform test -json $filter 2>&1)
-      $allLines | ForEach-Object {
-        try { $_.ToString() | ConvertFrom-Json -EA Stop } catch { $null }
-      } | Where-Object { $_.type -eq 'test_summary' -or $_.type -eq 'test_file' -or $_.type -eq 'test_run' } | ForEach-Object {
-        Write-Host $_.'@message'
-      }
-      $tests = @($allLines | ForEach-Object {
-        try { $_.ToString() | ConvertFrom-Json -EA Stop } catch { $null }
-      } | Where-Object { $_.type -eq 'test_run' -and $_.test_run.progress -eq 'complete' })
-      $fail = @($tests | Where-Object { $_.test_run.status -ne 'pass' }).Count
-      $e = [System.Security.SecurityElement]
-      $x = '<?xml version="1.0" encoding="UTF-8"?>' +
-        "<testsuites tests=`"$($tests.Count)`" failures=`"$fail`"><testsuite name=`"terraform`" tests=`"$($tests.Count)`" failures=`"$fail`">"
-      $tests | ForEach-Object {
-        $x += "<testcase name=`"$($e::Escape($_.test_run.run))`" classname=`"$($e::Escape($_.test_run.path))`">"
-        if ($_.test_run.status -ne 'pass') { $m = $e::Escape($_.'@message'); $x += "<failure message=`"$m`">$m</failure>" }
-        $x += "</testcase>"
-      }
-      $x += "</testsuite></testsuites>"
-      New-Item -ItemType Directory -Path "$root/test-results" -Force | Out-Null
-      $x | Out-File "$root/test-results/terraform-test-results.xml" -Encoding UTF8
-      if ($fail) { exit 1 }
+      terraform "-chdir=$env:TF_FILE_LOCATION" test -junit-xml="$PWD/test-results/terraform-test-results.xml" $filter
     required:
       env:
         - TF_FILE_LOCATION
