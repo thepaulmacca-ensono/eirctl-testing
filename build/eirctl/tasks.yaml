@@ -156,7 +156,6 @@ tasks:
     required:
       env:
         - TF_FILE_LOCATION
-        - TFLINT_CONFIG
 
   terraform:docs:
     context: infra
