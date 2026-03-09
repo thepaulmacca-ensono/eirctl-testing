@@ -234,6 +234,7 @@ tasks:
       New-Item -ItemType Directory -Path test-results -Force | Out-Null
       $filter = if ($env:TF_TEST_FILTER) { "-filter=$($env:TF_TEST_FILTER)" }
       terraform "-chdir=$env:TF_FILE_LOCATION" test -junit-xml="$PWD/test-results/terraform-test-results.xml" $filter
+      chmod 644 test-results/terraform-test-results.xml
     required:
       env:
         - TF_FILE_LOCATION
