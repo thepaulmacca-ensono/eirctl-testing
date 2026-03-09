@@ -45,7 +45,7 @@ tasks:
   lint:powershell:
     context: infra
     description: |
-      Run PSScriptAnalyzer on PowerShell embedded in eirctl YAML task files
+      Run PSScriptAnalyzer on PowerShell embedded in eirctl tasks
 
       Parses all YAML files under the working directory, extracts command blocks,
       and produces JUnit XML results at test-results/psscriptanalyzer-results.xml.
@@ -64,83 +64,61 @@ tasks:
       $yamlFiles = Get-ChildItem -Path $searchPath -Recurse -Include *.yaml, *.yml |
         Where-Object { $_.FullName -notmatch '[\\/]\.github[\\/]' }
 
+      $e = [System.Security.SecurityElement]
+      $testcases = @()
       $allResults = @()
       $totalScripts = 0
 
       foreach ($file in $yamlFiles) {
-        $content = Get-Content -Raw $file.FullName
-        $parsed = ConvertFrom-Yaml $content
+        $parsed = ConvertFrom-Yaml (Get-Content -Raw $file.FullName)
         if (-not $parsed.tasks) { continue }
 
         foreach ($taskEntry in $parsed.tasks.GetEnumerator()) {
-          $taskName = $taskEntry.Key
-          $task = $taskEntry.Value
-          if (-not $task.command) { continue }
+          if (-not $taskEntry.Value.command) { continue }
 
-          $ps = if ($task.command -is [System.Collections.IList]) {
-            ($task.command | ForEach-Object { $_.ToString() }) -join "`n"
+          $ps = if ($taskEntry.Value.command -is [System.Collections.IList]) {
+            ($taskEntry.Value.command | ForEach-Object { $_.ToString() }) -join "`n"
           } else {
-            $task.command.ToString()
+            $taskEntry.Value.command.ToString()
           }
 
           $tmpFile = [System.IO.Path]::GetTempFileName() -replace '\.tmp$', '.ps1'
           $ps | Set-Content -Path $tmpFile -Encoding UTF8
           $totalScripts++
 
-          $results = Invoke-ScriptAnalyzer -Path $tmpFile -ExcludeRule $excludeRules
-          foreach ($r in $results) {
-            $allResults += [PSCustomObject]@{
-              File     = $file.FullName
-              Task     = $taskName
-              Severity = $r.Severity.ToString()
-              Rule     = $r.RuleName
-              Line     = $r.Line
-              Message  = $r.Message
-            }
-          }
+          $results = @(Invoke-ScriptAnalyzer -Path $tmpFile -ExcludeRule $excludeRules)
           Remove-Item $tmpFile -Force
+
+          $escapedName = $e::Escape($taskEntry.Key)
+          $escapedClass = $e::Escape($file.FullName)
+
+          if ($results) {
+            foreach ($r in $results) {
+              $allResults += [PSCustomObject]@{
+                Task = $taskEntry.Key; Severity = $r.Severity; Rule = $r.RuleName; Message = $r.Message; Line = $r.Line
+              }
+              $msg = $e::Escape("[{0}] {1}: {2} (line {3})" -f $r.Severity, $r.RuleName, $r.Message, $r.Line)
+              $testcases += "<testcase name=`"$escapedName`" classname=`"$escapedClass`"><failure message=`"$msg`">$msg</failure></testcase>"
+            }
+          } else {
+            $testcases += "<testcase name=`"$escapedName`" classname=`"$escapedClass`" />"
+          }
         }
       }
 
-      $e = [System.Security.SecurityElement]
       $failCount = @($allResults | Where-Object { $_.Severity -eq 'Error' -or $_.Severity -eq 'Warning' }).Count
       $xml = '<?xml version="1.0" encoding="UTF-8"?>' +
         "<testsuites tests=`"$totalScripts`" failures=`"$failCount`">" +
-        "<testsuite name=`"PSScriptAnalyzer`" tests=`"$totalScripts`" failures=`"$failCount`">"
+        "<testsuite name=`"PSScriptAnalyzer`" tests=`"$totalScripts`" failures=`"$failCount`">" +
+        ($testcases -join '') +
+        "</testsuite></testsuites>"
 
-      $grouped = $allResults | Group-Object { "$($_.File) :: $($_.Task)" }
-      $processedTasks = @{}
-
-      foreach ($file in $yamlFiles) {
-        $content = Get-Content -Raw $file.FullName
-        $parsed = ConvertFrom-Yaml $content
-        if (-not $parsed.tasks) { continue }
-        foreach ($taskEntry in $parsed.tasks.GetEnumerator()) {
-          $key = "$($file.FullName) :: $($taskEntry.Key)"
-          $processedTasks[$key] = $true
-          $group = $grouped | Where-Object { $_.Name -eq $key }
-          $escapedName = $e::Escape($taskEntry.Key)
-          $escapedClass = $e::Escape($file.FullName)
-          if ($group) {
-            foreach ($r in $group.Group) {
-              $msg = $e::Escape(("[{0}] {1}: {2} (line {3})" -f $r.Severity, $r.Rule, $r.Message, $r.Line))
-              $xml += "<testcase name=`"$escapedName`" classname=`"$escapedClass`"><failure message=`"$msg`">$msg</failure></testcase>"
-            }
-          } else {
-            $xml += "<testcase name=`"$escapedName`" classname=`"$escapedClass`" />"
-          }
-        }
-      }
-
-      $xml += "</testsuite></testsuites>"
       New-Item -ItemType Directory -Path test-results -Force | Out-Null
       $xml | Out-File test-results/psscriptanalyzer-results.xml -Encoding UTF8
 
       Write-Host ("Analysed {0} scripts from {1} files — {2} issue(s) found" -f $totalScripts, $yamlFiles.Count, $allResults.Count)
-      if ($allResults.Count -gt 0) {
-        $allResults | ForEach-Object {
-          Write-Host ("  [{0}] {1} :: {2}: {3} (line {4})" -f $_.Severity, $_.Task, $_.Rule, $_.Message, $_.Line)
-        }
+      $allResults | ForEach-Object {
+        Write-Host ("  [{0}] {1} :: {2}: {3} (line {4})" -f $_.Severity, $_.Task, $_.Rule, $_.Message, $_.Line)
       }
       if ($failCount -gt 0) { exit 1 }
 
