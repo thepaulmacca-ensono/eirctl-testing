@@ -49,4 +49,5 @@ terraform.rc
 test-results/
 
 # Eirctl
+.eirctl/
 eirctl.env
