@@ -259,7 +259,7 @@ tasks:
 
   build:copy:
     context: powershell
-    description: Copy the Terraform Module into the outputs/module folder
+    description: Copy the Terraform module into the outputs/module folder
     command: |
       Copy-Item -Path ${env:TF_FILE_LOCATION}/* -Destination outputs/module/ -Recurse -Force -Exclude tests,.terraform,.terraform.lock.hcl
     required:
@@ -269,7 +269,7 @@ tasks:
   build:package:
     context: powershell
     description: |
-      Create Zip Package for the Terraform Module
+      Create zip package for the Terraform module
 
       Resolves repository name from GITHUB_REPOSITORY or BUILD_REPOSITORY_NAME.
       Resolves build number from BUILD_BUILDNUMBER or GITHUB_RUN_NUMBER.
