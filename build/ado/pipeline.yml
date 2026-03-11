@@ -243,26 +243,26 @@ stages:
               eirctl_version: $(eirctl_version)
 
           - ${{ if eq(parameters.pre_release, true) }}:
-            - task: Bash@3
-              displayName: Publish Pre-Release
-              inputs:
-                targetType: inline
-                script: |
-                  eirctl release
-              env:
-                PUBLISH_RELEASE: "true"
-                GITHUB_TOKEN: $(GITHUB_TOKEN)
-                ARTIFACTS_DIR: /eirctl/outputs/assets
-                PRERELEASE: "true"
+              - task: Bash@3
+                displayName: Publish Pre-Release
+                inputs:
+                  targetType: inline
+                  script: |
+                    eirctl release
+                env:
+                  PUBLISH_RELEASE: "true"
+                  GITHUB_TOKEN: $(GITHUB_TOKEN)
+                  ARTIFACTS_DIR: /eirctl/outputs/assets
+                  PRERELEASE: "true"
 
           - ${{ else }}:
-            - task: Bash@3
-              displayName: Publish Release
-              inputs:
-                targetType: inline
-                script: |
-                  eirctl release
-              env:
-                PUBLISH_RELEASE: "true"
-                GITHUB_TOKEN: $(GITHUB_TOKEN)
-                ARTIFACTS_DIR: /eirctl/outputs/assets
+              - task: Bash@3
+                displayName: Publish Release
+                inputs:
+                  targetType: inline
+                  script: |
+                    eirctl release
+                env:
+                  PUBLISH_RELEASE: "true"
+                  GITHUB_TOKEN: $(GITHUB_TOKEN)
+                  ARTIFACTS_DIR: /eirctl/outputs/assets
