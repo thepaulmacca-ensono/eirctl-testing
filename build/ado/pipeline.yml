@@ -138,6 +138,8 @@ stages:
     displayName: Build Modules
     dependsOn:
       - Validate
+      - ${{ if eq(parameters.generate_documentation, true) }}:
+          - Documentation
     jobs:
       - ${{ each module in parameters.modules }}:
           - job: Build_${{ replace(module.name, '-', '_') }}
