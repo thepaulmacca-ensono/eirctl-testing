@@ -15,13 +15,13 @@ parameters:
     displayName: Modules to Validate/Publish
     type: object
     default:
-      - name: management_landing_zone
+      - name: management-landing-zone
         display_name: Management Landing Zone
-      - name: connectivity_landing_zone_hub_spoke
+      - name: connectivity-landing-zone-hub-spoke
         display_name: Connectivity Landing Zone (Hub & Spoke)
-      - name: connectivity_landing_zone_virtual_wan
+      - name: connectivity-landing-zone-virtual-wan
         display_name: Connectivity Landing Zone (Virtual WAN)
-      - name: identity_landing_zone
+      - name: identity-landing-zone
         display_name: Identity Landing Zone
 
 trigger:
@@ -155,6 +155,7 @@ stages:
                     eirctl build
                 env:
                   TF_FILE_LOCATION: "src/${{ module.name }}/deploy/terraform"
+                  TF_MODULE_NAME: ${{ module.name }}
 
               - task: PublishPipelineArtifact@1
                 displayName: "Publish ${{ module.display_name }} Artifact"

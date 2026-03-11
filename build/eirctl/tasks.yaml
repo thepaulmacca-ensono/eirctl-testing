@@ -271,15 +271,13 @@ tasks:
     description: |
       Create zip package for the Terraform module
 
-      Resolves repository name from GITHUB_REPOSITORY or BUILD_REPOSITORY_NAME.
+      Requires TF_MODULE_NAME to identify the module.
       Resolves build number from BUILD_BUILDNUMBER or GITHUB_RUN_NUMBER.
     command: |
-      $repoFullName = if ($env:GITHUB_REPOSITORY) { $env:GITHUB_REPOSITORY } else { $env:BUILD_REPOSITORY_NAME }
-      if (-not $repoFullName) {
-        Write-Error "GITHUB_REPOSITORY or BUILD_REPOSITORY_NAME environment variable is required"
+      if (-not $env:TF_MODULE_NAME) {
+        Write-Error "TF_MODULE_NAME environment variable is required"
         exit 1
       }
-      $repoName = ($repoFullName -split '/')[-1]
 
       $buildNumber = if ($env:BUILD_BUILDNUMBER) { $env:BUILD_BUILDNUMBER } else { $env:GITHUB_RUN_NUMBER }
       if (-not $buildNumber) {
@@ -287,9 +285,12 @@ tasks:
         exit 1
       }
 
-      $zipPath = ("outputs/{0}-{1}.zip" -f $repoName, $buildNumber)
+      $zipPath = ("outputs/{0}-{1}.zip" -f $env:TF_MODULE_NAME, $buildNumber)
       Write-Host ("Creating package: {0}" -f $zipPath)
       Compress-Archive -Path outputs/module/* -DestinationPath $zipPath -Force
+    required:
+      env:
+        - TF_MODULE_NAME
 
   # Git
   git:tag:
