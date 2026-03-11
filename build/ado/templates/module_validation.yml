@@ -5,14 +5,10 @@ parameters:
     type: string
   - name: eirctl_version
     type: string
-  - name: run_condition
-    type: string
-    default: "true"
 
 jobs:
   - job: validate_${{ replace(parameters.module_name, '-', '_') }}
     displayName: "Validate ${{ parameters.display_name }} Module"
-    condition: ${{ parameters.run_condition }}
     variables:
       TF_FILE_LOCATION: "src/${{ parameters.module_name }}/deploy/terraform"
       TFLINT_CONFIG: "src/${{ parameters.module_name }}/.tflint.hcl"

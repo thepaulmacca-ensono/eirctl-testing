@@ -91,55 +91,9 @@ stages:
               failTaskOnFailedTests: true
               failTaskOnMissingResultsFile: true
 
-      - job: Detect_Changes
-        displayName: Detect Module Changes
-        steps:
-          - checkout: self
-            fetchDepth: 0
-
-          - task: Bash@3
-            name: modules
-            displayName: Check Changed Modules
-            inputs:
-              targetType: inline
-              script: |
-                if [ -n "$SYSTEM_PULLREQUEST_TARGETBRANCH" ]; then
-                  BASE="origin/${SYSTEM_PULLREQUEST_TARGETBRANCH#refs/heads/}"
-                else
-                  BASE="HEAD~1"
-                fi
-
-                CHANGED=$(git diff --name-only $BASE HEAD 2>&1)
-                if { [ $? -ne 0 ] || [ -z "$CHANGED" ]; } && [ "$BASE" = "HEAD~1" ]; then
-                  echo "Warning: Unable to determine changes (git diff output: $CHANGED), defaulting to run all modules"
-                  CHANGED="src/"
-                fi
-
-                echo "Changed files:"
-                echo "$CHANGED"
-                echo ""
-
-                MODULES=$(cat <<'EOF' | jq -r '.[].name'
-                ${{ convertToJson(parameters.modules) }}
-                EOF
-                )
-
-                for MODULE in $MODULES; do
-                  if echo "$CHANGED" | grep -q "^src/$MODULE/"; then
-                    echo "$MODULE: changed"
-                    echo "##vso[task.setvariable variable=${MODULE};isOutput=true]true"
-                  else
-                    echo "$MODULE: skipped"
-                    echo "##vso[task.setvariable variable=${MODULE};isOutput=true]false"
-                  fi
-                done
-
   - stage: Validate
     dependsOn:
       - Preliminaries
-    variables:
-      ${{ each module in parameters.modules }}:
-        ${{ module.name }}_changed: $[stageDependencies.Preliminaries.Detect_Changes.outputs['modules.${{ module.name }}']]
     jobs:
       - ${{ each module in parameters.modules }}:
           - template: templates/module_validation.yml
@@ -147,7 +101,6 @@ stages:
               module_name: ${{ module.name }}
               display_name: ${{ module.display_name }}
               eirctl_version: $(eirctl_version)
-              run_condition: eq(variables.${{ module.name }}_changed, 'true')
 
   - ${{ if eq(parameters.generate_documentation, true) }}:
       - stage: Documentation
@@ -183,30 +136,31 @@ stages:
     dependsOn:
       - Validate
     jobs:
-      - job: Build_Package
-        displayName: Build and Create Package
-        steps:
-          - checkout: self
-            fetchDepth: 1
+      - ${{ each module in parameters.modules }}:
+          - job: Build_${{ replace(module.name, '-', '_') }}
+            displayName: "Build ${{ module.display_name }}"
+            steps:
+              - checkout: self
+                fetchDepth: 1
 
-          - template: templates/setup.yml
-            parameters:
-              eirctl_version: $(eirctl_version)
+              - template: templates/setup.yml
+                parameters:
+                  eirctl_version: $(eirctl_version)
 
-          - task: Bash@3
-            displayName: Build and Package Modules
-            inputs:
-              targetType: inline
-              script: |
-                eirctl build
-            env:
-              TF_FILE_LOCATION: $(TF_FILE_LOCATION)
+              - task: Bash@3
+                displayName: "Build ${{ module.display_name }}"
+                inputs:
+                  targetType: inline
+                  script: |
+                    eirctl build
+                env:
+                  TF_FILE_LOCATION: "src/${{ module.name }}/deploy/terraform"
 
-          - task: PublishPipelineArtifact@1
-            displayName: Publish Package Artifact
-            inputs:
-              targetPath: $(Build.SourcesDirectory)/outputs
-              artifact: package
+              - task: PublishPipelineArtifact@1
+                displayName: "Publish ${{ module.display_name }} Artifact"
+                inputs:
+                  targetPath: $(Build.SourcesDirectory)/outputs
+                  artifact: ${{ module.name }}
 
   - stage: Release
     dependsOn:
@@ -231,12 +185,13 @@ stages:
                   patterns: "**/*.pdf"
                   path: $(Build.SourcesDirectory)/outputs/assets
 
-          - task: DownloadPipelineArtifact@2
-            displayName: Download Package Artifact
-            inputs:
-              artifact: package
-              patterns: "**/*.zip"
-              path: $(Build.SourcesDirectory)/outputs/assets
+          - ${{ each module in parameters.modules }}:
+              - task: DownloadPipelineArtifact@2
+                displayName: "Download ${{ module.display_name }} Artifact"
+                inputs:
+                  artifact: ${{ module.name }}
+                  patterns: "**/*.zip"
+                  path: $(Build.SourcesDirectory)/outputs/assets
 
           - template: templates/setup.yml
             parameters:
