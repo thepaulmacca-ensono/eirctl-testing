@@ -152,6 +152,7 @@ stages:
                 env:
                   TF_FILE_LOCATION: "src/${{ module.name }}/deploy/terraform"
                   TF_MODULE_NAME: ${{ module.name }}
+                  ADOC_INPUT_FILE: "docs/readme/${{ module.name }}/index.adoc"
 
               # Upload the zip file as a pipeline artifact
               - task: PublishPipelineArtifact@1

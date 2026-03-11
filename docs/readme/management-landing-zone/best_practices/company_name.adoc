@@ -1,0 +1,6 @@
+=== Organisation Prefix
+
+Consider including an organisation prefix in resource names to avoid conflicts in shared environments:
+
+* `log-contoso-management`
+* `rg-contoso-management`

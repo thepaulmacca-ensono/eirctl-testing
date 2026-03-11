@@ -1,0 +1,3 @@
+=== Routing Configuration
+
+Leverage Virtual WAN automated routing for simplicity. For advanced scenarios, use custom route tables and static routes to control traffic flow between hubs and spokes.

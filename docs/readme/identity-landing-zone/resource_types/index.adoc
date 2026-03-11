@@ -1,0 +1,40 @@
+== Resource Types
+
+The module deploys the following Azure resource types:
+
+[cols="1,1,2"]
+|===
+| Resource Type | API Type | Description
+
+| Resource Group
+| `azurerm_resource_group`
+| Container for identity resources
+
+| Virtual Network
+| `azurerm_virtual_network`
+| Identity VNet with address space `10.1.0.0/16`
+
+| Subnet (Domain Controllers)
+| `azurerm_subnet`
+| Domain Controllers subnet (`10.1.1.0/24`)
+
+| Subnet (AAD Connect)
+| `azurerm_subnet`
+| Microsoft Entra Connect subnet (`10.1.2.0/24`)
+
+| Network Security Group (DC)
+| `azurerm_network_security_group`
+| NSG for Domain Controllers subnet
+
+| Network Security Group (AAD)
+| `azurerm_network_security_group`
+| NSG for AAD Connect subnet
+
+| NSG Association (DC)
+| `azurerm_subnet_network_security_group_association`
+| Associates NSG with Domain Controllers subnet
+
+| NSG Association (AAD)
+| `azurerm_subnet_network_security_group_association`
+| Associates NSG with AAD Connect subnet
+|===

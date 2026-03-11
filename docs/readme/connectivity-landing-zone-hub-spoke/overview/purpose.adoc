@@ -1,0 +1,7 @@
+=== Purpose
+
+* Establish a centralised hub virtual network for shared network services
+* Provide a GatewaySubnet for VPN or ExpressRoute connectivity to on-premises networks
+* Deploy an AzureFirewallSubnet for centralised traffic inspection and filtering
+* Provision Azure Bastion for secure remote access to virtual machines
+* Enable network segmentation through hub and spoke peering

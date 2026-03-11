@@ -1,0 +1,12 @@
+=== Management with Extended Retention
+
+Deploy management resources with a 90-day retention period for production environments:
+
+[source,hcl]
+----
+module "management" {
+  source            = "./src/management-landing-zone/deploy/terraform"
+  location          = "uksouth"
+  retention_in_days = 90
+}
+----

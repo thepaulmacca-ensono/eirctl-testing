@@ -1,0 +1,7 @@
+=== Migrating from Legacy Pricing Tiers
+
+If your existing workspace uses the legacy Free, Standard, or Premium pricing tiers, migrate to PerGB2018:
+
+1. Update the `sku` parameter in your Terraform configuration
+2. Run `terraform plan` to verify the change
+3. Apply the change during a maintenance window

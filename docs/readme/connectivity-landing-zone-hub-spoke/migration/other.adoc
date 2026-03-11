@@ -1,0 +1,8 @@
+=== Migrating from Virtual WAN to Hub & Spoke
+
+If migrating from Azure Virtual WAN to a traditional hub and spoke topology:
+
+1. Deploy the hub VNet in parallel with the existing Virtual WAN
+2. Establish peering between spoke VNets and the new hub
+3. Migrate routing from Virtual WAN to Azure Firewall / UDR-based routing
+4. Decommission the Virtual WAN resources

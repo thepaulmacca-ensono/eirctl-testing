@@ -1,0 +1,14 @@
+=== Connecting VNets to Virtual Hub
+
+Connect spoke virtual networks to the Virtual Hub:
+
+[source,hcl]
+----
+resource "azurerm_virtual_hub_connection" "spoke" {
+  name                      = "conn-spoke-workload"
+  virtual_hub_id            = module.vwan.virtual_hub_id
+  remote_virtual_network_id = azurerm_virtual_network.spoke.id
+
+  internet_security_enabled = true
+}
+----

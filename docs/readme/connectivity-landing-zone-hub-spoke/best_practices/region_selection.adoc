@@ -1,0 +1,3 @@
+=== Region Selection
+
+Deploy the hub network in the same region as your primary workloads. For disaster recovery, consider a secondary hub in a paired region with global VNet peering.

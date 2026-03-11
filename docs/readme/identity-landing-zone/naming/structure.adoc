@@ -1,0 +1,10 @@
+=== Structure
+
+The module follows Azure Cloud Adoption Framework naming conventions for identity resources:
+
+[source]
+----
+<resource-type>-<workload>
+----
+
+For example: `vnet-identity`, `snet-domain-controllers`.

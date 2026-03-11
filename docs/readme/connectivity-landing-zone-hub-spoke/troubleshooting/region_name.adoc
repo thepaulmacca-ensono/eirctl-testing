@@ -1,0 +1,3 @@
+=== Reserved Subnet Names
+
+Azure requires specific names for certain subnets: `GatewaySubnet`, `AzureFirewallSubnet`, and `AzureBastionSubnet`. These names are case-sensitive and cannot be changed. If you receive a validation error, verify the exact subnet name.

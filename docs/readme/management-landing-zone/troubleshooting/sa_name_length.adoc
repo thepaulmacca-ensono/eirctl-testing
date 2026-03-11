@@ -1,0 +1,3 @@
+=== Workspace Name Length
+
+Log Analytics Workspace names must be between 4 and 63 characters. If you receive a validation error, check that your workspace name (including any prefix or suffix) falls within this range.

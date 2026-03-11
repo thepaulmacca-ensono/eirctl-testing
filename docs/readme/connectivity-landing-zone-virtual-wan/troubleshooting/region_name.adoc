@@ -1,0 +1,3 @@
+=== Virtual WAN Not Available in Region
+
+Not all Azure regions support Virtual WAN. Check the https://azure.microsoft.com/en-gb/explore/global-infrastructure/products-by-region/[Azure products by region] page to verify availability.

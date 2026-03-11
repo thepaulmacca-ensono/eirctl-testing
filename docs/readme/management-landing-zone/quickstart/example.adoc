@@ -1,0 +1,22 @@
+=== Complete Example
+
+[source,hcl]
+----
+provider "azurerm" {
+  features {}
+}
+
+module "management" {
+  source = "./src/management-landing-zone/deploy/terraform"
+
+  location = "uksouth"
+}
+
+output "resource_group_name" {
+  value = module.management.resource_group_name
+}
+
+output "log_analytics_workspace_id" {
+  value = module.management.log_analytics_workspace_id
+}
+----

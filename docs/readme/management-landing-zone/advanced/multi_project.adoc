@@ -1,0 +1,22 @@
+=== Multi-Subscription Deployment
+
+Deploy management resources to a dedicated management subscription while collecting logs from workload subscriptions:
+
+[source,hcl]
+----
+provider "azurerm" {
+  alias           = "management"
+  subscription_id = var.management_subscription_id
+  features {}
+}
+
+module "management" {
+  source = "./src/management-landing-zone/deploy/terraform"
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  location = "uksouth"
+}
+----

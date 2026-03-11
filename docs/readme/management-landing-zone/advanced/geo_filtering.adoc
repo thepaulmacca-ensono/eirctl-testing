@@ -1,0 +1,3 @@
+=== Multi-Region Logging
+
+For multi-region deployments, consider deploying a Log Analytics Workspace per region to reduce data egress costs and improve query performance. Use Azure Monitor data collection rules to route logs to the appropriate workspace.

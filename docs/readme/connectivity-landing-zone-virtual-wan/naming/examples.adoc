@@ -1,0 +1,15 @@
+=== Examples
+
+[cols="1,1"]
+|===
+| Resource | Name
+
+| Resource Group
+| `rg-connectivity-vwan`
+
+| Virtual WAN
+| `vwan-connectivity`
+
+| Virtual Hub
+| `vhub-uksouth`
+|===

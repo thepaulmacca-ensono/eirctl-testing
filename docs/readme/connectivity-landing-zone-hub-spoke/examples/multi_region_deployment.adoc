@@ -1,0 +1,16 @@
+=== Multi-Region Hub Deployment
+
+Deploy hub networks in two regions for redundancy:
+
+[source,hcl]
+----
+module "hub_primary" {
+  source   = "./src/connectivity-landing-zone-hub-spoke/deploy/terraform"
+  location = "uksouth"
+}
+
+module "hub_secondary" {
+  source   = "./src/connectivity-landing-zone-hub-spoke/deploy/terraform"
+  location = "ukwest"
+}
+----

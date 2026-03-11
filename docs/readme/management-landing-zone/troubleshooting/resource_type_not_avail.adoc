@@ -1,0 +1,8 @@
+=== Provider Not Registered
+
+If you see `MissingSubscriptionRegistration`, register the required resource provider:
+
+[source,bash]
+----
+az provider register --namespace Microsoft.OperationalInsights
+----

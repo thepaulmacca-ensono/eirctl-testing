@@ -1,0 +1,8 @@
+=== Migrating to Microsoft Entra Domain Services
+
+If migrating from self-managed ADDS to Microsoft Entra Domain Services:
+
+1. Deploy Microsoft Entra Domain Services in the domain controllers subnet
+2. Synchronise users and groups from on-premises AD via Entra Connect
+3. Update application configurations to use the managed domain
+4. Decommission self-managed domain controllers in phases

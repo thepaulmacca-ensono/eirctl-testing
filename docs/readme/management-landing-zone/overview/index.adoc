@@ -1,0 +1,7 @@
+== Overview
+
+The Management Landing Zone module deploys centralized logging, monitoring, and management resources for Azure Landing Zones. It provisions a dedicated resource group and Log Analytics Workspace for aggregating logs and metrics across your Azure estate.
+
+include::purpose.adoc[]
+
+include::key_features.adoc[]

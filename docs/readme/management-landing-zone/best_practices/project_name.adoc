@@ -1,0 +1,3 @@
+=== Project Identification
+
+Tag all management resources with project and cost centre identifiers to support chargeback and governance reporting.

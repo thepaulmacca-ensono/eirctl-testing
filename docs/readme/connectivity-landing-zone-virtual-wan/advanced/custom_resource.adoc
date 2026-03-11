@@ -1,0 +1,9 @@
+=== Virtual Hub Address Sizing
+
+The Virtual Hub address prefix determines the number of available addresses for hub infrastructure:
+
+* `/23` (default) — 512 addresses, suitable for most deployments
+* `/22` — 1,024 addresses, for larger deployments with many connections
+* `/24` — 256 addresses, minimum recommended size
+
+NOTE: The hub address prefix cannot be changed after deployment.

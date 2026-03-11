@@ -1,0 +1,10 @@
+=== Basic Usage
+
+[source,hcl]
+----
+module "identity" {
+  source = "./src/identity-landing-zone/deploy/terraform"
+
+  location = "uksouth"
+}
+----

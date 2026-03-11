@@ -1,0 +1,7 @@
+=== Purpose
+
+* Provide a centralized management subscription for logging and monitoring
+* Deploy a Log Analytics Workspace for aggregating platform and workload logs
+* Establish a consistent resource group for management resources
+* Support Azure Monitor and Microsoft Defender for Cloud integration
+* Enable governance and compliance through centralized log retention policies

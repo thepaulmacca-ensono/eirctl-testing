@@ -1,0 +1,25 @@
+=== Hub with Spoke Peering
+
+Deploy a hub network and peer a workload spoke:
+
+[source,hcl]
+----
+module "hub" {
+  source   = "./src/connectivity-landing-zone-hub-spoke/deploy/terraform"
+  location = "uksouth"
+}
+
+resource "azurerm_virtual_network" "spoke_workload" {
+  name                = "vnet-spoke-workload"
+  address_space       = ["10.10.0.0/16"]
+  location            = "uksouth"
+  resource_group_name = "rg-workload"
+}
+
+resource "azurerm_virtual_network_peering" "spoke_to_hub" {
+  name                      = "peer-spoke-to-hub"
+  resource_group_name       = "rg-workload"
+  virtual_network_name      = azurerm_virtual_network.spoke_workload.name
+  remote_virtual_network_id = module.hub.hub_vnet_id
+}
+----

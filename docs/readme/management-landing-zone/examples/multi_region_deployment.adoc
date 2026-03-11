@@ -1,0 +1,16 @@
+=== Multi-Region Management
+
+Deploy management resources across multiple regions:
+
+[source,hcl]
+----
+module "management_uk" {
+  source   = "./src/management-landing-zone/deploy/terraform"
+  location = "uksouth"
+}
+
+module "management_eu" {
+  source   = "./src/management-landing-zone/deploy/terraform"
+  location = "westeurope"
+}
+----

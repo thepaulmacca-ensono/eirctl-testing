@@ -1,0 +1,7 @@
+=== NSG Association Failures
+
+If NSG-to-subnet association fails, ensure that:
+
+* The NSG and subnet are in the same region
+* No other NSG is already associated with the subnet
+* The `Microsoft.Network` resource provider is registered

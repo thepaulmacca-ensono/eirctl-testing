@@ -1,0 +1,7 @@
+=== Azure Policy for Virtual WAN
+
+Apply Azure Policy to govern Virtual WAN resources:
+
+* *Require Standard Tier* — Ensure all Virtual WANs use Standard tier for full feature support
+* *Enforce Secure Hub* — Require Azure Firewall integration on Virtual Hubs
+* *Audit Unconnected VNets* — Identify spoke VNets not connected to a Virtual Hub

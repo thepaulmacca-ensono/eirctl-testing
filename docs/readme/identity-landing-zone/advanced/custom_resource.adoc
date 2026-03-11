@@ -1,0 +1,9 @@
+=== Custom NSG Rules
+
+Add custom NSG rules to allow specific identity traffic patterns:
+
+* *LDAP* — TCP/UDP 389 for directory queries
+* *LDAPS* — TCP 636 for secure directory queries
+* *Kerberos* — TCP/UDP 88 for authentication
+* *DNS* — TCP/UDP 53 for name resolution
+* *RPC* — TCP 135 and dynamic ports for AD replication

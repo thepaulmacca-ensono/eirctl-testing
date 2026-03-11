@@ -1,0 +1,3 @@
+=== Workspace Design
+
+Use a single centralized Log Analytics Workspace for platform logs. Separate workspaces may be appropriate for workload-specific logging with different retention requirements.

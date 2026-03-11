@@ -1,0 +1,3 @@
+=== Subnet Address Space Overlap
+
+If you see `NetcfgInvalidSubnet` errors, check that your subnet address ranges do not overlap with each other or the VNet address space. Each subnet must be a non-overlapping CIDR block within the VNet.

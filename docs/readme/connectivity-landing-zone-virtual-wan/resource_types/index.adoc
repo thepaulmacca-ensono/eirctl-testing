@@ -1,0 +1,38 @@
+== Resource Types
+
+The module deploys the following Azure resource types:
+
+[cols="1,1,2"]
+|===
+| Resource Type | API Type | Description
+
+| Resource Group
+| `azurerm_resource_group`
+| Container for Virtual WAN resources
+
+| Virtual WAN
+| `azurerm_virtual_wan`
+| Standard-tier Virtual WAN for global connectivity
+
+| Virtual Hub
+| `azurerm_virtual_hub`
+| Regional hub with address prefix `10.0.0.0/23`
+|===
+
+[source,hcl]
+----
+resource "azurerm_virtual_wan" "connectivity" {
+  name                = "vwan-connectivity"
+  resource_group_name = azurerm_resource_group.connectivity.name
+  location            = azurerm_resource_group.connectivity.location
+  type                = "Standard"
+}
+
+resource "azurerm_virtual_hub" "hub" {
+  name                = "vhub-uksouth"
+  resource_group_name = azurerm_resource_group.connectivity.name
+  location            = azurerm_resource_group.connectivity.location
+  virtual_wan_id      = azurerm_virtual_wan.connectivity.id
+  address_prefix      = "10.0.0.0/23"
+}
+----

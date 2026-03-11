@@ -1,0 +1,10 @@
+=== Basic Usage
+
+[source,hcl]
+----
+module "management" {
+  source = "./src/management-landing-zone/deploy/terraform"
+
+  location = "uksouth"
+}
+----

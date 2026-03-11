@@ -1,0 +1,7 @@
+=== Key Features
+
+* *Log Analytics Workspace* — Centralized log aggregation using the PerGB2018 pricing tier
+* *Configurable Retention* — Default 30-day log retention with adjustable policies
+* *Resource Group* — Dedicated `rg-management` resource group for management resources
+* *Azure Verified Modules* — Built using AVM patterns for consistency and supportability
+* *Platform Integration* — Ready for Azure Monitor, Sentinel, and Defender for Cloud

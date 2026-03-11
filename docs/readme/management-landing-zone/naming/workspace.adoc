@@ -1,0 +1,6 @@
+=== Workspace Naming
+
+The Log Analytics Workspace name must be globally unique within Azure. Consider appending an environment or region suffix if deploying multiple instances:
+
+* `log-management-uksouth`
+* `log-management-prod`

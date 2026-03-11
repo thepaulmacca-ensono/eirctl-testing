@@ -1,0 +1,13 @@
+=== Environment File Configuration
+
+The module uses an `eirctl.env` file for environment-specific settings:
+
+[source,bash]
+----
+TF_FILE_LOCATION=deploy/terraform
+ENVIRONMENT_NAME=dev
+TF_BACKEND_RG=rg-tfstate
+TF_BACKEND_SA=satfstate
+TF_BACKEND_CONTAINER=tfstate
+TF_BACKEND_KEY=connectivity-hub-spoke.tfstate
+----

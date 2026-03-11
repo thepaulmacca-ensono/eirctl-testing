@@ -1,0 +1,22 @@
+=== Complete Example
+
+[source,hcl]
+----
+provider "azurerm" {
+  features {}
+}
+
+module "vwan" {
+  source = "./src/connectivity-landing-zone-virtual-wan/deploy/terraform"
+
+  location = "uksouth"
+}
+
+output "virtual_wan_id" {
+  value = module.vwan.virtual_wan_id
+}
+
+output "virtual_hub_id" {
+  value = module.vwan.virtual_hub_id
+}
+----

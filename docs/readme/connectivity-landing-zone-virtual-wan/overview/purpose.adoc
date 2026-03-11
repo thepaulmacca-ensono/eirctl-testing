@@ -1,0 +1,7 @@
+=== Purpose
+
+* Provide a Microsoft-managed global transit network for Azure Landing Zones
+* Deploy a Standard-tier Virtual WAN for full routing and security capabilities
+* Provision a Virtual Hub as the central routing point for connected networks
+* Simplify branch-to-Azure and VNet-to-VNet connectivity
+* Enable automated routing without the need for user-defined route tables

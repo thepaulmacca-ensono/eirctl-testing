@@ -1,0 +1,10 @@
+=== Basic Usage
+
+[source,hcl]
+----
+module "vwan" {
+  source = "./src/connectivity-landing-zone-virtual-wan/deploy/terraform"
+
+  location = "uksouth"
+}
+----

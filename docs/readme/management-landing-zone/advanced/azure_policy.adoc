@@ -1,0 +1,7 @@
+=== Azure Policy Integration
+
+Assign Azure Policy to enforce diagnostic settings across your management subscription:
+
+* *Deploy Diagnostic Settings* — Automatically send platform logs to the Log Analytics Workspace
+* *Require Log Analytics Workspace* — Ensure all resources have diagnostic settings configured
+* *Audit Log Retention* — Verify retention policies meet compliance requirements

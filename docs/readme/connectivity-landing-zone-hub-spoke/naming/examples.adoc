@@ -1,0 +1,17 @@
+=== Examples
+
+[cols="1,1"]
+|===
+| Resource | Name
+
+| Resource Group
+| `rg-connectivity-hub`
+
+| Hub Virtual Network
+| `vnet-hub`
+
+| Bastion NSG
+| `nsg-bastion`
+|===
+
+NOTE: Subnet names such as `GatewaySubnet`, `AzureFirewallSubnet`, and `AzureBastionSubnet` are Azure-reserved names and cannot be changed.

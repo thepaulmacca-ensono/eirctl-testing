@@ -1,0 +1,3 @@
+=== Identity Isolation
+
+Keep identity workloads in a dedicated subscription and VNet, separate from application workloads. Peer with the connectivity hub and use NSG rules to restrict access to identity ports only.

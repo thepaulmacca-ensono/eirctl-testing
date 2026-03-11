@@ -1,0 +1,3 @@
+=== Address Prefix Conflict
+
+If you see `AddressPrefixConflict` when creating a Virtual Hub, the hub address prefix overlaps with a connected VNet or another hub. Choose a non-overlapping CIDR block.

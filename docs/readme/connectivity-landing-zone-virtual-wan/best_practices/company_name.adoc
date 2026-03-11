@@ -1,0 +1,3 @@
+=== Address Space Planning
+
+Plan Virtual Hub address prefixes carefully. Hub prefixes cannot overlap with connected VNet address spaces or on-premises ranges. Reserve non-overlapping /23 blocks per region.

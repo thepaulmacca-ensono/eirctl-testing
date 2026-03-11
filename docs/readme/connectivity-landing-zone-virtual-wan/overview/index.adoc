@@ -1,0 +1,7 @@
+== Overview
+
+The Connectivity Landing Zone (Virtual WAN) module deploys Azure Virtual WAN resources for a Microsoft-managed global transit network architecture. It provisions a Virtual WAN and Virtual Hub, providing simplified any-to-any connectivity between branches, VNets, and Azure regions.
+
+include::purpose.adoc[]
+
+include::key_features.adoc[]

@@ -1,0 +1,10 @@
+=== Migrating Existing Log Analytics Workspaces
+
+If you have an existing Log Analytics Workspace, import it into Terraform state:
+
+[source,bash]
+----
+terraform import azurerm_log_analytics_workspace.management /subscriptions/<sub-id>/resourceGroups/rg-management/providers/Microsoft.OperationalInsights/workspaces/log-management
+----
+
+NOTE: Ensure the resource configuration in Terraform matches the existing workspace settings before importing.

@@ -1,0 +1,3 @@
+=== Network Segmentation
+
+Separate workloads into dedicated spoke virtual networks peered to the hub. Use NSGs and Azure Firewall rules to control traffic flow between spokes.

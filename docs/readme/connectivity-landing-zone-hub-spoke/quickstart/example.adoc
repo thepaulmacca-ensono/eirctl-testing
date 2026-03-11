@@ -1,0 +1,26 @@
+=== Complete Example
+
+[source,hcl]
+----
+provider "azurerm" {
+  features {}
+}
+
+module "hub_spoke" {
+  source = "./src/connectivity-landing-zone-hub-spoke/deploy/terraform"
+
+  location = "uksouth"
+}
+
+output "hub_vnet_id" {
+  value = module.hub_spoke.hub_vnet_id
+}
+
+output "gateway_subnet_id" {
+  value = module.hub_spoke.gateway_subnet_id
+}
+
+output "bastion_subnet_id" {
+  value = module.hub_spoke.bastion_subnet_id
+}
+----

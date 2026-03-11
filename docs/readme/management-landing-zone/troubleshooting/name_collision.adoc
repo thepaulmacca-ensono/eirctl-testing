@@ -1,0 +1,3 @@
+=== Name Already Exists
+
+Log Analytics Workspace names must be globally unique. If you receive a `ConflictError`, choose a more specific name by appending environment or region identifiers.

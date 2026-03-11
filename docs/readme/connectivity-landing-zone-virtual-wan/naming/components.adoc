@@ -1,0 +1,18 @@
+=== Components
+
+[cols="1,2"]
+|===
+| Component | Description
+
+| `rg-`
+| Resource Group prefix
+
+| `vwan-`
+| Virtual WAN prefix
+
+| `vhub-`
+| Virtual Hub prefix
+
+| `connectivity-vwan`
+| Workload identifier for Virtual WAN resources
+|===

@@ -1,0 +1,3 @@
+=== Invalid Region
+
+If you see `InvalidLocation` errors, verify that Log Analytics is available in your target region. Some regions may have limited service availability. Check the https://azure.microsoft.com/en-gb/explore/global-infrastructure/products-by-region/[Azure products by region] page.

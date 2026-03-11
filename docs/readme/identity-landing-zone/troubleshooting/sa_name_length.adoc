@@ -1,0 +1,3 @@
+=== NSG Rule Conflicts
+
+If domain controllers cannot communicate, verify that NSG rules allow the required AD ports (LDAP 389, Kerberos 88, DNS 53, RPC 135). Check both the source and destination NSGs for conflicting deny rules.

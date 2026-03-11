@@ -1,0 +1,3 @@
+=== Resource Naming
+
+Follow Azure Cloud Adoption Framework naming conventions. Use `vnet-` for virtual networks, `nsg-` for network security groups, and `rg-` for resource groups.

@@ -1,0 +1,8 @@
+=== Provider Registration
+
+If you see `MissingSubscriptionRegistration`, register the required resource providers:
+
+[source,bash]
+----
+az provider register --namespace Microsoft.Network
+----

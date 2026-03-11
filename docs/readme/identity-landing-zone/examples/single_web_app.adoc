@@ -1,0 +1,11 @@
+=== Basic Identity Deployment
+
+A minimal identity landing zone deployment:
+
+[source,hcl]
+----
+module "identity" {
+  source   = "./src/identity-landing-zone/deploy/terraform"
+  location = "uksouth"
+}
+----

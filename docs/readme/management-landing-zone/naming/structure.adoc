@@ -1,0 +1,10 @@
+=== Structure
+
+The module follows Azure naming conventions from the Cloud Adoption Framework:
+
+[source]
+----
+<resource-type>-<workload>
+----
+
+For example: `rg-management`, `log-management`.

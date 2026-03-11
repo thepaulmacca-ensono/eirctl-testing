@@ -1,0 +1,12 @@
+=== Examples
+
+[cols="1,1"]
+|===
+| Resource | Name
+
+| Resource Group
+| `rg-management`
+
+| Log Analytics Workspace
+| `log-management`
+|===

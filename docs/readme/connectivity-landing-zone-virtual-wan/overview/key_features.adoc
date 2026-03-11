@@ -1,0 +1,7 @@
+=== Key Features
+
+* *Virtual WAN* — Standard tier WAN resource (`vwan-connectivity`) for enterprise-grade connectivity
+* *Virtual Hub* — Regional hub (`10.0.0.0/23`) in UK South for centralised routing
+* *Automated Routing* — Microsoft-managed route propagation between connected networks
+* *Branch Connectivity* — Support for site-to-site VPN, point-to-site VPN, and ExpressRoute
+* *Global Transit* — Hub-to-hub connectivity across Azure regions

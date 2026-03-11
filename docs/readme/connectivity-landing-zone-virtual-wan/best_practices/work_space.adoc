@@ -1,0 +1,3 @@
+=== Hub vs Standard Tier
+
+Always use the Standard tier for production deployments. The Basic tier does not support hub-to-hub transit, Azure Firewall integration, or VPN-to-ExpressRoute transit.

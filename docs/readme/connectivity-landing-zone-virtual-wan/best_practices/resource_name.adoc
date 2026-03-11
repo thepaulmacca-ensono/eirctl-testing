@@ -1,0 +1,3 @@
+=== Resource Naming
+
+Follow Azure Cloud Adoption Framework naming conventions. Use `vwan-` for Virtual WANs, `vhub-` for Virtual Hubs, and `rg-` for resource groups.

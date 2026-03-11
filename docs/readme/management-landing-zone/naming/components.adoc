@@ -1,0 +1,15 @@
+=== Components
+
+[cols="1,2"]
+|===
+| Component | Description
+
+| `rg-`
+| Resource Group prefix
+
+| `log-`
+| Log Analytics Workspace prefix
+
+| `management`
+| Workload identifier for management resources
+|===

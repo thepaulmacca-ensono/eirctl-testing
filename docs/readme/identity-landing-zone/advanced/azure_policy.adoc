@@ -1,0 +1,7 @@
+=== Azure Policy for Identity
+
+Apply Azure Policy to enforce identity security standards:
+
+* *Require NSG on Identity Subnets* — Ensure all identity subnets have associated NSGs
+* *Deny Public IP on Identity VMs* — Prevent domain controllers from having public endpoints
+* *Audit Identity VNet Peering* — Monitor peering configurations for unauthorised connections

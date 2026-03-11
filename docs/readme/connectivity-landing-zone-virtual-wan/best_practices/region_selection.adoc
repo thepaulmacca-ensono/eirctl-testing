@@ -1,0 +1,3 @@
+=== Region Selection
+
+Deploy Virtual Hubs in regions where you have workloads. Virtual WAN supports hub-to-hub transit across regions, so deploy hubs only where needed rather than in every region.

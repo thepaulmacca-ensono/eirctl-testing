@@ -1,0 +1,11 @@
+=== Basic Management Deployment
+
+A minimal deployment with default settings:
+
+[source,hcl]
+----
+module "management" {
+  source   = "./src/management-landing-zone/deploy/terraform"
+  location = "uksouth"
+}
+----

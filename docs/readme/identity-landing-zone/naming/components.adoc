@@ -1,0 +1,21 @@
+=== Components
+
+[cols="1,2"]
+|===
+| Component | Description
+
+| `rg-`
+| Resource Group prefix
+
+| `vnet-`
+| Virtual Network prefix
+
+| `snet-`
+| Subnet prefix
+
+| `nsg-`
+| Network Security Group prefix
+
+| `identity`
+| Workload identifier for identity resources
+|===

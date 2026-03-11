@@ -1,0 +1,10 @@
+=== Structure
+
+The module follows Azure Cloud Adoption Framework naming conventions for networking resources:
+
+[source]
+----
+<resource-type>-<workload>
+----
+
+For example: `vnet-hub`, `rg-connectivity-hub`.

@@ -1,0 +1,11 @@
+== Advanced Usage
+
+include::multi_project.adoc[]
+
+include::custom_resource.adoc[]
+
+include::geo_filtering.adoc[]
+
+include::env_file.adoc[]
+
+include::azure_policy.adoc[]

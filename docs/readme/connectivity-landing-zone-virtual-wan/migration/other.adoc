@@ -1,0 +1,9 @@
+=== Migrating from Hub & Spoke to Virtual WAN
+
+If migrating from a traditional hub and spoke topology to Virtual WAN:
+
+1. Deploy the Virtual WAN and Virtual Hub in parallel
+2. Connect spoke VNets to the Virtual Hub
+3. Migrate routing from UDR-based to Virtual WAN automated routing
+4. Migrate VPN/ExpressRoute connections to Virtual WAN gateways
+5. Decommission the traditional hub VNet and associated resources

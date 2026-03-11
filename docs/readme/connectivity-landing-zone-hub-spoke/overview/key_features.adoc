@@ -1,0 +1,7 @@
+=== Key Features
+
+* *Hub Virtual Network* — Centralised VNet (`10.0.0.0/16`) acting as the transit network
+* *GatewaySubnet* — Dedicated subnet (`10.0.1.0/24`) for VPN Gateway or ExpressRoute
+* *AzureFirewallSubnet* — Dedicated subnet (`10.0.2.0/24`) for Azure Firewall deployment
+* *Azure Bastion* — Secure RDP/SSH access via AzureBastionSubnet (`10.0.3.0/24`) with NSG
+* *Network Security Groups* — Pre-configured NSG for the Bastion subnet with required rules

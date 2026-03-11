@@ -1,0 +1,3 @@
+=== Domain Controller Placement
+
+Deploy at least two domain controllers across availability zones for high availability. Place them in the Domain Controllers subnet with the pre-configured NSG.

@@ -1,0 +1,8 @@
+=== Custom Address Spaces
+
+Override the default address space to fit your IP address plan:
+
+* Hub VNet: `10.0.0.0/16` (default) — supports up to 65,534 addresses
+* GatewaySubnet: Must be at least /27 for VPN Gateway
+* AzureFirewallSubnet: Must be at least /26 for Azure Firewall
+* AzureBastionSubnet: Must be at least /26 for Azure Bastion

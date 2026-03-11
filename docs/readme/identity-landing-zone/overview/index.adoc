@@ -1,0 +1,7 @@
+== Overview
+
+The Identity Landing Zone module deploys identity and access management infrastructure for Azure Landing Zones. It provisions a dedicated virtual network with subnets for Active Directory Domain Controllers and Microsoft Entra Connect (Azure AD Connect), enabling centralized identity management and hybrid identity scenarios.
+
+include::purpose.adoc[]
+
+include::key_features.adoc[]

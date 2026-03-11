@@ -233,9 +233,16 @@ tasks:
   # Documentation
   docs:docbook:
     context: asciidoc
-    description: Convert documentation to Docbook for conversion to Markdown
-    command:
-      - asciidoctor -b docbook -o outputs/tmp/README.xml docs/readme/index.adoc
+    description: |
+      Convert AsciiDoc documentation to Docbook XML for conversion to Markdown.
+
+      Set ADOC_INPUT_FILE to the path of the AsciiDoc index file (e.g., docs/readme/<module_name>/index.adoc).
+    command: |
+      New-Item -ItemType Directory -Path outputs/tmp -Force | Out-Null
+      asciidoctor -b docbook -o outputs/tmp/README.xml $env:ADOC_INPUT_FILE
+    required:
+      env:
+        - ADOC_INPUT_FILE
 
   docs:markdown:
     context: asciidoc

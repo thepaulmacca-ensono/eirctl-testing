@@ -1,0 +1,38 @@
+= Stacks Connectivity Landing Zone (Hub & Spoke) Module
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+:last-update-label!:
+
+include::overview/index.adoc[]
+
+include::quickstart/index.adoc[]
+
+include::naming/index.adoc[]
+
+include::resource_types/index.adoc[]
+
+include::advanced/index.adoc[]
+
+include::best_practices/index.adoc[]
+
+include::migration/index.adoc[]
+
+include::troubleshooting/index.adoc[]
+
+include::examples/index.adoc[]
+
+== API Reference
+
+include::tfdocs.adoc[]
+
+== Support
+
+For issues, questions, or contributions related to this module, please contact the Ensono Stacks team.
+
+== License
+
+Copyright (c) 2025 Ensono
+
+This project is licensed under the MIT License.

@@ -1,0 +1,11 @@
+=== Basic Hub Deployment
+
+A minimal hub network with default subnets:
+
+[source,hcl]
+----
+module "hub" {
+  source   = "./src/connectivity-landing-zone-hub-spoke/deploy/terraform"
+  location = "uksouth"
+}
+----

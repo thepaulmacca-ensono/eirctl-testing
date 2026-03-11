@@ -1,0 +1,6 @@
+=== Workspace Naming
+
+When deploying multiple hub networks (e.g., per region), append a region or environment suffix:
+
+* `vnet-hub-uksouth`
+* `vnet-hub-prod`

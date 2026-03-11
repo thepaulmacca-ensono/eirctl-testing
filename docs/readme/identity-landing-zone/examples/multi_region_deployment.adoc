@@ -1,0 +1,16 @@
+=== Multi-Region Identity
+
+Deploy identity infrastructure in two regions for AD replication:
+
+[source,hcl]
+----
+module "identity_primary" {
+  source   = "./src/identity-landing-zone/deploy/terraform"
+  location = "uksouth"
+}
+
+module "identity_secondary" {
+  source   = "./src/identity-landing-zone/deploy/terraform"
+  location = "ukwest"
+}
+----

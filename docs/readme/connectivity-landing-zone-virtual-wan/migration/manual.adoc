@@ -1,0 +1,10 @@
+=== Importing Existing Virtual WAN Resources
+
+Import existing Virtual WAN infrastructure into Terraform state:
+
+[source,bash]
+----
+terraform import azurerm_virtual_wan.connectivity /subscriptions/<sub-id>/resourceGroups/rg-connectivity-vwan/providers/Microsoft.Network/virtualWans/vwan-connectivity
+
+terraform import azurerm_virtual_hub.hub /subscriptions/<sub-id>/resourceGroups/rg-connectivity-vwan/providers/Microsoft.Network/virtualHubs/vhub-uksouth
+----

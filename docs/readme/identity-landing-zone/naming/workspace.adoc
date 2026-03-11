@@ -1,0 +1,6 @@
+=== Workspace Naming
+
+When deploying identity resources across multiple regions or environments, append a suffix:
+
+* `vnet-identity-uksouth`
+* `vnet-identity-prod`

@@ -1,0 +1,7 @@
+=== Azure Policy for Network Governance
+
+Apply Azure Policy to enforce network security across hub and spoke networks:
+
+* *Deny Public IP on NICs* — Prevent direct internet access from spoke VMs
+* *Require NSG on Subnets* — Ensure all subnets have an associated NSG
+* *Audit Missing UDRs* — Verify spoke subnets route traffic through the hub firewall

@@ -1,0 +1,19 @@
+=== Multi-Region Virtual WAN
+
+Deploy Virtual Hubs in multiple regions under a single Virtual WAN for global transit:
+
+[source,hcl]
+----
+module "vwan" {
+  source   = "./src/connectivity-landing-zone-virtual-wan/deploy/terraform"
+  location = "uksouth"
+}
+
+resource "azurerm_virtual_hub" "hub_eu" {
+  name                = "vhub-westeurope"
+  resource_group_name = module.vwan.resource_group_name
+  location            = "westeurope"
+  virtual_wan_id      = module.vwan.virtual_wan_id
+  address_prefix      = "10.1.0.0/23"
+}
+----

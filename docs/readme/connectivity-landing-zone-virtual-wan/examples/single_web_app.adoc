@@ -1,0 +1,11 @@
+=== Basic Virtual WAN Deployment
+
+A minimal deployment with a single hub:
+
+[source,hcl]
+----
+module "vwan" {
+  source   = "./src/connectivity-landing-zone-virtual-wan/deploy/terraform"
+  location = "uksouth"
+}
+----

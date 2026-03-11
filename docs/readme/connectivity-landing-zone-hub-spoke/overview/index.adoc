@@ -1,0 +1,7 @@
+== Overview
+
+The Connectivity Landing Zone (Hub & Spoke) module deploys a traditional hub and spoke network topology for Azure Landing Zones. It provisions a centralized hub virtual network with dedicated subnets for Azure Firewall, VPN/ExpressRoute Gateway, and Azure Bastion, providing secure and scalable network connectivity.
+
+include::purpose.adoc[]
+
+include::key_features.adoc[]

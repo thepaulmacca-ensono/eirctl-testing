@@ -1,0 +1,24 @@
+=== Examples
+
+[cols="1,1"]
+|===
+| Resource | Name
+
+| Resource Group
+| `rg-identity-landing-zone`
+
+| Identity Virtual Network
+| `vnet-identity`
+
+| Domain Controllers Subnet
+| `snet-domain-controllers`
+
+| AAD Connect Subnet
+| `snet-aad-connect`
+
+| Domain Controllers NSG
+| `nsg-domain-controllers`
+
+| AAD Connect NSG
+| `nsg-aad-connect`
+|===

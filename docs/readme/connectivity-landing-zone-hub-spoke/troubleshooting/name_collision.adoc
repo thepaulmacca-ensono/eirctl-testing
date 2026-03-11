@@ -1,0 +1,7 @@
+=== Peering Conflicts
+
+If VNet peering fails with a `Conflict` error, check that:
+
+* No existing peering with the same name exists
+* The remote VNet address space does not overlap with the local VNet
+* Both VNets are in the same Azure AD tenant (or cross-tenant peering is configured)

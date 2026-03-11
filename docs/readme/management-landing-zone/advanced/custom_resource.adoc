@@ -1,0 +1,8 @@
+=== Custom Retention Periods
+
+Adjust the Log Analytics Workspace retention period based on compliance requirements:
+
+* 30 days — Default for development environments
+* 90 days — Recommended for production workloads
+* 365 days — Required for some regulatory frameworks
+* 730 days — Maximum retention period supported

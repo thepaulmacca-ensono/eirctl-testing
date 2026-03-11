@@ -1,0 +1,36 @@
+== Resource Types
+
+The module deploys the following Azure resource types:
+
+[cols="1,1,2"]
+|===
+| Resource Type | API Type | Description
+
+| Resource Group
+| `azurerm_resource_group`
+| Container for hub networking resources
+
+| Virtual Network
+| `azurerm_virtual_network`
+| Hub VNet with address space `10.0.0.0/16`
+
+| Subnet (Gateway)
+| `azurerm_subnet`
+| GatewaySubnet for VPN/ExpressRoute (`10.0.1.0/24`)
+
+| Subnet (Firewall)
+| `azurerm_subnet`
+| AzureFirewallSubnet for Azure Firewall (`10.0.2.0/24`)
+
+| Subnet (Bastion)
+| `azurerm_subnet`
+| AzureBastionSubnet for Azure Bastion (`10.0.3.0/24`)
+
+| Network Security Group
+| `azurerm_network_security_group`
+| NSG for Bastion subnet
+
+| NSG Association
+| `azurerm_subnet_network_security_group_association`
+| Associates NSG with Bastion subnet
+|===

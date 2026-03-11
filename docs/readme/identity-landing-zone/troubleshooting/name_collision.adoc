@@ -1,0 +1,3 @@
+=== Address Space Overlap
+
+If you see `AddressSpaceOverlap` when peering the identity VNet, ensure the identity address space (`10.1.0.0/16`) does not overlap with the hub VNet or other peered networks.

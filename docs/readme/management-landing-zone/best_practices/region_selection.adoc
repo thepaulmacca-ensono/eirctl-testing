@@ -1,0 +1,3 @@
+=== Region Selection
+
+Deploy management resources in the same region as your primary workloads to minimise latency. For multi-region deployments, deploy a workspace per region and use cross-workspace queries to correlate data.

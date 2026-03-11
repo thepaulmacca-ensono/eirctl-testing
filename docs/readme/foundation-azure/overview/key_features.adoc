@@ -1,8 +1,0 @@
-=== Key Features
-
-* Integration with Azure Naming module
-* Azure Regions utility for intelligent region selection
-* Workspace-aware naming for environment differentiation
-* Configurable short name lengths to meet Azure resource constraints
-* Extended naming patterns for resources not covered by base Azure Naming module
-* Optional environment file generation for Bash, PowerShell, and Terraform

@@ -1,0 +1,7 @@
+=== Workspace Naming
+
+Virtual Hub names typically include the region to distinguish hubs in a multi-region deployment:
+
+* `vhub-uksouth`
+* `vhub-westeurope`
+* `vhub-eastus`

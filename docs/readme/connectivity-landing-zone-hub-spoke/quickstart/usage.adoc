@@ -1,0 +1,10 @@
+=== Basic Usage
+
+[source,hcl]
+----
+module "hub_spoke" {
+  source = "./src/connectivity-landing-zone-hub-spoke/deploy/terraform"
+
+  location = "uksouth"
+}
+----

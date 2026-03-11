@@ -1,0 +1,3 @@
+=== IP Address Planning
+
+Plan your address space carefully to avoid overlapping ranges between hub, spokes, and on-premises networks. Reserve sufficient space for future growth.

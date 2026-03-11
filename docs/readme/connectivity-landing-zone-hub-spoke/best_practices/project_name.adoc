@@ -1,0 +1,7 @@
+=== Subnet Sizing
+
+Size subnets appropriately for their intended use:
+
+* GatewaySubnet: /27 minimum (VPN Gateway), /26 recommended
+* AzureFirewallSubnet: /26 minimum
+* AzureBastionSubnet: /26 minimum
