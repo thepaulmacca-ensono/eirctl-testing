@@ -45,10 +45,22 @@ resource "azurerm_subnet" "firewall" {
   address_prefixes     = ["10.0.2.0/24"]
 }
 
+# Bastion NSG
+resource "azurerm_network_security_group" "bastion" {
+  name                = "nsg-bastion"
+  resource_group_name = azurerm_resource_group.hub.name
+  location            = azurerm_resource_group.hub.location
+}
+
 # Bastion Subnet
 resource "azurerm_subnet" "bastion" {
   name                 = "AzureBastionSubnet"
   resource_group_name  = azurerm_resource_group.hub.name
   virtual_network_name = azurerm_virtual_network.hub.name
   address_prefixes     = ["10.0.3.0/24"]
+}
+
+resource "azurerm_subnet_network_security_group_association" "bastion" {
+  subnet_id                 = azurerm_subnet.bastion.id
+  network_security_group_id = azurerm_network_security_group.bastion.id
 }
