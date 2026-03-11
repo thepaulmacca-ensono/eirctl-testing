@@ -2,7 +2,7 @@ name: $(version_major).$(version_minor).$(version_revision)
 
 parameters:
   - name: pre_release
-    displayName: Create a Pre-Release from a Feature Branch
+    displayName: Create a pre-release from a feature branch
     type: boolean
     default: false
 
@@ -208,54 +208,7 @@ stages:
               targetPath: $(Build.SourcesDirectory)/outputs
               artifact: package
 
-  # - stage: Release
-  #   dependsOn:
-  #     - Build
-  #     - ${{ if eq(parameters.generate_documentation, true) }}:
-  #         - Documentation
-  #   condition: and(succeeded(), or(eq(variables['is_main'], 'true'), eq('${{ parameters.pre_release }}', 'true')))
-  #   variables:
-  #     - group: github-creds
-  #   jobs:
-  #     - job: Create_GitHub_Release
-  #       displayName: Create GitHub Release
-  #       steps:
-  #         - checkout: self
-  #           fetchDepth: 1
-
-  #         - ${{ if eq(parameters.generate_documentation, true) }}:
-  #             - task: DownloadPipelineArtifact@2
-  #               displayName: Download Documentation Artifact
-  #               inputs:
-  #                 artifact: docs
-  #                 patterns: "**/*.pdf"
-  #                 path: $(Build.SourcesDirectory)/outputs/assets
-
-  #         - task: DownloadPipelineArtifact@2
-  #           displayName: Download Package Artifact
-  #           inputs:
-  #             artifact: package
-  #             patterns: "**/*.zip"
-  #             path: $(Build.SourcesDirectory)/outputs/assets
-
-  #         - template: templates/setup.yml
-  #           parameters:
-  #             eirctl_version: $(eirctl_version)
-
-  #         - task: Bash@3
-  #           displayName: Release
-  #           inputs:
-  #             targetType: inline
-  #             script: |
-  #               eirctl release
-  #           env:
-  #             PUBLISH_RELEASE: "true"
-  #             GITHUB_TOKEN: $(GITHUB_TOKEN)
-  #             ARTIFACTS_DIR: /eirctl/outputs/assets
-  #             ${{ if eq(parameters.pre_release, true) }}:
-  #               PRERELEASE: "true"
-
-  - stage: Tag
+  - stage: Release
     dependsOn:
       - Build
       - ${{ if eq(parameters.generate_documentation, true) }}:
@@ -264,8 +217,8 @@ stages:
     variables:
       - group: github-creds
     jobs:
-      - job: Create_Tag
-        displayName: Create Tag
+      - job: Create_GitHub_Release
+        displayName: Create GitHub Release
         steps:
           - checkout: self
             fetchDepth: 1
@@ -289,11 +242,27 @@ stages:
             parameters:
               eirctl_version: $(eirctl_version)
 
-          - task: Bash@3
-            displayName: Tag and Push
-            inputs:
-              targetType: inline
-              script: |
-                eirctl git:tag
-            env:
-              GITHUB_TOKEN: $(GITHUB_TOKEN)
+          - ${{ if eq(parameters.pre_release, true) }}:
+            - task: Bash@3
+              displayName: Publish Pre-Release
+              inputs:
+                targetType: inline
+                script: |
+                  eirctl release
+              env:
+                PUBLISH_RELEASE: "true"
+                GITHUB_TOKEN: $(GITHUB_TOKEN)
+                ARTIFACTS_DIR: /eirctl/outputs/assets
+                PRERELEASE: "true"
+
+          - ${{ else }}:
+            - task: Bash@3
+              displayName: Publish Release
+              inputs:
+                targetType: inline
+                script: |
+                  eirctl release
+              env:
+                PUBLISH_RELEASE: "true"
+                GITHUB_TOKEN: $(GITHUB_TOKEN)
+                ARTIFACTS_DIR: /eirctl/outputs/assets
