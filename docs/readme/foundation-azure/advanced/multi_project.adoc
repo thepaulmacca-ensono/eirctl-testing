@@ -1,0 +1,22 @@
+=== Multi-Project Deployments
+
+[source,hcl]
+----
+module "foundation" {
+  source = "./stacks-foundation-azure"
+
+  company_name = "Ensono"
+  location     = "uksouth"
+  project      = ["frontend", "backend", "database"]
+  stage_name   = "foundation"
+  environment  = "prod"
+}
+
+# Create resources for each project
+resource "azurerm_resource_group" "projects" {
+  for_each = toset(["frontend", "backend", "database"])
+
+  name     = module.foundation.names[each.key].resource_group.name
+  location = var.location
+}
+----

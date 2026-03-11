@@ -1,0 +1,6 @@
+=== From Other Naming Conventions
+
+1. Deploy foundation module alongside existing resources
+2. Gradually migrate resources to new naming
+3. Use `moved` blocks to prevent resource recreation
+4. Update all references to resource names

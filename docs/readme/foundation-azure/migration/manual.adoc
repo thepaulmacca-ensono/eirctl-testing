@@ -1,0 +1,40 @@
+=== From Manual Naming
+
+[source,hcl]
+----
+# Before
+resource "azurerm_resource_group" "main" {
+  name     = "my-resource-group"
+  location = "uksouth"
+}
+
+# After
+module "foundation" {
+  source       = "./stacks-foundation-azure"
+  company_name = "MyCompany"
+  location     = "uksouth"
+  project      = ["main"]
+  stage_name   = "foundation"
+  environment  = "prod"
+}
+
+resource "azurerm_resource_group" "main" {
+  name     = module.foundation.names["main"].resource_group.name
+  location = var.location
+}
+----
+
+[WARNING]
+====
+**State Migration Required**
+
+Changing resource names causes Terraform to destroy and recreate resources. Use `terraform state mv` or `moved` blocks to migrate without recreation:
+
+[source,hcl]
+----
+moved {
+  from = azurerm_resource_group.main
+  to   = azurerm_resource_group.new_name
+}
+----
+====

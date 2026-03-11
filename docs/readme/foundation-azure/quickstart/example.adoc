@@ -1,0 +1,41 @@
+=== Complete Example
+
+[source,hcl]
+----
+module "foundation" {
+  source = "./stacks-foundation-azure"
+
+  # Required
+  company_name = "Ensono"
+  location     = "uksouth"
+  project      = ["webapp", "api", "database"]
+  stage_name   = "foundation"
+  environment  = "dev"
+
+  # Optional
+  short_name_length       = 4
+  region_recommend_filter = true
+  region_geography        = "Europe"
+  enable_avm_telemetry    = false
+}
+
+# Access naming for different projects
+resource "azurerm_resource_group" "webapp" {
+  name     = module.foundation.names["webapp"].resource_group.name
+  location = var.location
+}
+
+resource "azurerm_storage_account" "webapp" {
+  name                = module.foundation.names["webapp"].storage_account.name
+  resource_group_name = azurerm_resource_group.webapp.name
+  location            = var.location
+  # ... other configuration
+}
+
+# Access extended naming for unsupported resource types
+resource "azurerm_frontdoor_firewall_policy" "main" {
+  name                = module.foundation.extended_names["webapp"].frontdoor_firewall_policy.name
+  resource_group_name = azurerm_resource_group.webapp.name
+  # ... other configuration
+}
+----

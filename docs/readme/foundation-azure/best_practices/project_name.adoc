@@ -1,0 +1,6 @@
+=== Project Name Selection
+
+Choose meaningful, concise project names:
+
+* ✅ Good: `webapp`, `api`, `data`, `network`
+* ❌ Avoid: `project1`, `app`, `test`

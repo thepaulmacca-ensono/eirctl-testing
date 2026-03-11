@@ -1,0 +1,18 @@
+=== Integration with Azure Policy
+
+[source,hcl]
+----
+resource "azurerm_resource_group" "main" {
+  name     = module.foundation.names["webapp"].resource_group.name
+  location = var.location
+
+  tags = {
+    NamingConvention = "Stacks-Foundation"
+    Company          = var.company_name
+    Project          = "webapp"
+    Environment      = terraform.workspace
+    ManagedBy        = "Terraform"
+    CreatedAt        = module.foundation.state_time.rfc3339
+  }
+}
+----

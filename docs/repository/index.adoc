@@ -1,0 +1,45 @@
+= Stacks Foundation Azure Repository Guide
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+:last-update-label!:
+
+== Overview
+
+This repository contains the **Stacks Foundation Azure Terraform Module** - a foundational module that provides standardized naming conventions and regional configurations for Azure infrastructure deployments across Ensono Stacks projects.
+
+This guide covers how to work with **this repository**, including the build system, development workflow, and contribution guidelines.
+
+[NOTE]
+====
+For documentation on **using the module** in your infrastructure deployments, see the module README that is packaged with the distribution.
+====
+
+include::structure.adoc[]
+
+include::build-system.adoc[]
+
+include::documentation.adoc[]
+
+include::development.adoc[]
+
+include::testing.adoc[]
+
+include::build-config.adoc[]
+
+include::troubleshooting.adoc[]
+
+include::best-practices.adoc[]
+
+include::contributing.adoc[]
+
+include::advanced.adoc[]
+
+include::support.adoc[]
+
+== License
+
+Copyright (c) 2025 Ensono
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.

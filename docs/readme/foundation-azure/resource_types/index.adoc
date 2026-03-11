@@ -1,0 +1,39 @@
+== Extended Resource Types
+
+The module extends the base Azure Naming module to support additional Azure resources:
+
+=== Microsoft Fabric
+
+[source,hcl]
+----
+# Access Fabric resource names
+module.foundation.extended_names["project"].fabric_capacity.name
+module.foundation.extended_names["project"].fabric_workspace.name
+module.foundation.extended_names["project"].fabric_lakehouse.name
+----
+
+=== Azure Front Door
+
+[source,hcl]
+----
+# Access Front Door resource names
+module.foundation.extended_names["project"].frontdoor_firewall_policy.name
+module.foundation.extended_names["project"].frontdoor_endpoint.name
+module.foundation.extended_names["project"].frontdoor_security_policy.name
+----
+
+=== AI Services
+
+[source,hcl]
+----
+# Access AI service names
+module.foundation.extended_names["project"].ai_services.name
+module.foundation.extended_names["project"].ai_foundry.name
+module.foundation.extended_names["project"].ai_foundry_project.name
+----
+
+=== Other Extended Types
+
+* `managed_identity` - Managed Identity naming
+* `private_dns_zone_virtual_network_link` - Private DNS zone VNet link
+* `key_vault_v2` - Alternative Key Vault naming pattern

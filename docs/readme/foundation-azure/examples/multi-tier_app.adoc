@@ -1,0 +1,54 @@
+=== Multi-Tier Application
+
+[source,hcl]
+----
+module "foundation" {
+  source       = "./stacks-foundation-azure"
+  company_name = "Fabrikam"
+  location     = "westeurope"
+  project      = ["frontend", "backend", "database"]
+  stage_name   = "foundation"
+  environment  = "prod"
+}
+
+# Frontend resources
+resource "azurerm_resource_group" "frontend" {
+  name     = module.foundation.names["frontend"].resource_group.name
+  location = var.location
+}
+
+resource "azurerm_static_site" "frontend" {
+  name                = module.foundation.names["frontend"].static_web_app.name
+  resource_group_name = azurerm_resource_group.frontend.name
+  location            = azurerm_resource_group.frontend.location
+}
+
+# Backend resources
+resource "azurerm_resource_group" "backend" {
+  name     = module.foundation.names["backend"].resource_group.name
+  location = var.location
+}
+
+resource "azurerm_kubernetes_cluster" "backend" {
+  name                = module.foundation.names["backend"].kubernetes_cluster.name
+  resource_group_name = azurerm_resource_group.backend.name
+  location            = azurerm_resource_group.backend.location
+  dns_prefix          = module.foundation.names["backend"].kubernetes_cluster.name
+  # ... other configuration
+}
+
+# Database resources
+resource "azurerm_resource_group" "database" {
+  name     = module.foundation.names["database"].resource_group.name
+  location = var.location
+}
+
+resource "azurerm_sql_server" "database" {
+  name                         = module.foundation.names["database"].mssql_server.name
+  resource_group_name          = azurerm_resource_group.database.name
+  location                     = azurerm_resource_group.database.location
+  version                      = "12.0"
+  administrator_login          = "sqladmin"
+  administrator_login_password = var.sql_admin_password
+}
+----

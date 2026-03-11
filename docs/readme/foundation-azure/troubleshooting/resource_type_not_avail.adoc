@@ -1,0 +1,18 @@
+=== Extended Resource Type Not Available
+
+**Problem:** Need a resource type not in `extended_names`.
+
+**Solution:**
+
+Create custom name based on existing patterns:
+
+[source,hcl]
+----
+locals {
+  custom_resource_name = replace(
+    module.foundation.names["webapp"].resource_group.name,
+    "rg-",
+    "myprefix-"
+  )
+}
+----

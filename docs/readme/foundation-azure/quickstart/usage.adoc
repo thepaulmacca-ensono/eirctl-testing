@@ -1,0 +1,20 @@
+=== Basic Usage
+
+[source,hcl]
+----
+module "foundation" {
+  source = "./stacks-foundation-azure"
+
+  company_name = "Ensono"
+  location     = "uksouth"
+  project      = ["webapp"]
+  stage_name   = "foundation"
+  environment  = "dev"
+}
+
+# Use the generated names
+resource "azurerm_resource_group" "main" {
+  name     = module.foundation.names["webapp"].resource_group.name
+  location = var.location
+}
+----

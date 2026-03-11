@@ -2,14 +2,14 @@ name: $(version_major).$(version_minor).$(version_revision)
 
 parameters:
   - name: pre_release
-    displayName: Create a pre-release from a feature branch
+    displayName: Create a Pre-Release from a Feature Branch
     type: boolean
     default: false
 
   - name: generate_documentation
     displayName: Generate Documentation
     type: boolean
-    default: false
+    default: true
 
   - name: modules
     displayName: Modules to Validate/Publish
@@ -54,11 +54,6 @@ stages:
         steps:
           - checkout: self
             fetchDepth: 1
-
-          - template: templates/docker_cache.yml
-            parameters:
-              context: powershell
-              context_label: PowerShell
 
           - template: templates/setup.yml
             parameters:
@@ -119,11 +114,6 @@ stages:
               - checkout: self
                 fetchDepth: 1
 
-              - template: templates/docker_cache.yml
-                parameters:
-                  context: asciidoc
-                  context_label: Asciidoc
-
               - template: templates/setup.yml
                 parameters:
                   eirctl_version: $(eirctl_version)
@@ -137,6 +127,7 @@ stages:
                 env:
                   BUILDNUMBER: $(Build.BuildNumber)
 
+              # Upload the documentation as a pipeline artifact
               - task: PublishPipelineArtifact@1
                 displayName: Publish Documentation
                 inputs:
@@ -155,17 +146,12 @@ stages:
               - checkout: self
                 fetchDepth: 1
 
-              - template: templates/docker_cache.yml
-                parameters:
-                  context: powershell
-                  context_label: PowerShell
-
               - template: templates/setup.yml
                 parameters:
                   eirctl_version: $(eirctl_version)
 
               - task: Bash@3
-                displayName: "Build ${{ module.display_name }}"
+                displayName: "Build and Package ${{ module.display_name }} Module"
                 inputs:
                   targetType: inline
                   script: |
@@ -174,11 +160,18 @@ stages:
                   TF_FILE_LOCATION: "src/${{ module.name }}/deploy/terraform"
                   TF_MODULE_NAME: ${{ module.name }}
 
+              # Upload the zip file as a pipeline artifact
               - task: PublishPipelineArtifact@1
-                displayName: "Publish ${{ module.display_name }} Module"
+                displayName: "Publish ${{ module.display_name }} Package"
                 inputs:
                   targetPath: $(Build.SourcesDirectory)/outputs
                   artifact: ${{ module.name }}
+
+              - task: PublishPipelineArtifact@1
+                displayName: Publish README file
+                inputs:
+                  targetPath: $(Build.SourcesDirectory)/outputs/module/README.md
+                  artifact: readme
 
   - stage: Release
     dependsOn:
@@ -210,6 +203,11 @@ stages:
                   artifact: ${{ module.name }}
                   patterns: "**/*.zip"
                   path: $(Build.SourcesDirectory)/outputs/assets
+
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: readme
+              path: $(Build.SourcesDirectory)/outputs/assets
 
           - template: templates/setup.yml
             parameters:

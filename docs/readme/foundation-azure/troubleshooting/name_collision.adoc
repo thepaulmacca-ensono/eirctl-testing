@@ -1,0 +1,16 @@
+=== Name Collision
+
+**Problem:** Resource name already exists (unlikely due to random seed).
+
+**Solution:**
+
+1. Destroy and recreate the `random_string` resource
+2. Use a different workspace
+3. Change the project name
+
+[source,bash]
+----
+# Force new random seed
+terraform taint random_string.random_seed
+terraform apply
+----

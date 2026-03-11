@@ -1,0 +1,15 @@
+=== Storage Account Name Too Long
+
+**Problem:** Generated storage account name exceeds 24 characters.
+
+**Solution:**
+
+[source,hcl]
+----
+module "foundation" {
+  source            = "./stacks-foundation-azure"
+  company_name      = "Co"    # Shorter company name
+  short_name_length = 2       # Reduce short name length
+  # ... other variables
+}
+----

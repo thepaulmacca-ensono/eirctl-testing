@@ -1,0 +1,21 @@
+=== Custom Resource Name Manipulation
+
+[source,hcl]
+----
+locals {
+  # Truncate name for length-restricted resources
+  truncated_name = substr(
+    module.foundation.names["webapp"].storage_account.name,
+    0,
+    20
+  )
+
+  # Uppercase for tags
+  rg_name_upper = upper(
+    module.foundation.names["webapp"].resource_group.name
+  )
+
+  # Add custom suffix
+  custom_name = "${module.foundation.names["webapp"].app_service.name}-frontend"
+}
+----

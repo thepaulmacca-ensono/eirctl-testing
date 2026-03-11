@@ -1,0 +1,21 @@
+=== Region Not Found
+
+**Problem:** Specified location not available with current filters.
+
+**Solution:**
+
+[source,hcl]
+----
+# Temporarily disable filters to see available regions
+module "foundation" {
+  source                  = "./stacks-foundation-azure"
+  region_recommend_filter = false
+  region_geography        = null
+  # ... other variables
+}
+
+# Check available regions in output
+output "available_regions" {
+  value = keys(module.foundation.regions.regions_by_name)
+}
+----

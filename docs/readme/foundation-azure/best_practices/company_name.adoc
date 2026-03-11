@@ -1,0 +1,28 @@
+=== Consistent Company Naming
+
+Use the same `company_name` across all infrastructure deployments:
+
+[source,hcl]
+----
+# Bad - inconsistent naming
+module "foundation_1" {
+  company_name = "Ensono"
+}
+
+module "foundation_2" {
+  company_name = "ENS"
+}
+
+# Good - consistent naming
+locals {
+  company_name = "Ensono"
+}
+
+module "foundation_1" {
+  company_name = local.company_name
+}
+
+module "foundation_2" {
+  company_name = local.company_name
+}
+----

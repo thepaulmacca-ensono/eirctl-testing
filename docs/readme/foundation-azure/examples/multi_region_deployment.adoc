@@ -1,0 +1,41 @@
+=== Multi-Region Deployment
+
+[source,hcl]
+----
+locals {
+  regions = {
+    primary   = "uksouth"
+    secondary = "ukwest"
+  }
+}
+
+module "foundation_primary" {
+  source       = "./stacks-foundation-azure"
+  company_name = "GlobalCorp"
+  location     = local.regions.primary
+  project      = ["webapp"]
+  stage_name   = "foundation"
+  environment  = "prod"
+}
+
+module "foundation_secondary" {
+  source       = "./stacks-foundation-azure"
+  company_name = "GlobalCorp"
+  location     = local.regions.secondary
+  project      = ["webapp"]
+  stage_name   = "foundation"
+  environment  = "prod"
+}
+
+# Primary region resources
+resource "azurerm_resource_group" "primary" {
+  name     = module.foundation_primary.names["webapp"].resource_group.name
+  location = local.regions.primary
+}
+
+# Secondary region resources
+resource "azurerm_resource_group" "secondary" {
+  name     = module.foundation_secondary.names["webapp"].resource_group.name
+  location = local.regions.secondary
+}
+----

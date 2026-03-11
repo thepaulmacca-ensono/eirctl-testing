@@ -1,0 +1,7 @@
+=== Structure
+
+The module generates resource names with the following structure:
+
+----
+<resource-prefix>-<company-short>-<project-short>-<region-code>-<workspace>-<seed>
+----

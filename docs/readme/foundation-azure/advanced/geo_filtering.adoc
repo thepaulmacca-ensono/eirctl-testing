@@ -1,0 +1,15 @@
+=== Geography-Based Filtering
+
+[source,hcl]
+----
+module "foundation_europe" {
+  source = "./stacks-foundation-azure"
+
+  company_name        = "Ensono"
+  location            = "uksouth"
+  project             = ["webapp"]
+  stage_name          = "foundation"
+  environment         = "prod"
+  region_geography    = "Europe"  # Only European regions
+}
+----

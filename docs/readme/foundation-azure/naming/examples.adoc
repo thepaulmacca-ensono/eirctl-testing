@@ -1,0 +1,21 @@
+=== Example Names
+
+[cols="1,2"]
+|===
+|Resource Type |Generated Name
+
+|Resource Group
+|`rg-enso-weba-uks-dev-abcd`
+
+|Storage Account
+|`stensoweba-uks-dev-abcd`
+
+|Key Vault
+|`kv-enso-weba-uks-dev-abcd`
+
+|App Service
+|`app-enso-weba-uks-dev-abcd`
+
+|Container Registry
+|`crensoweba-uks-dev-abcd`
+|===

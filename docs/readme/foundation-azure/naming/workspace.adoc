@@ -1,0 +1,16 @@
+=== Workspace Integration
+
+The naming convention automatically includes the Terraform workspace name:
+
+[source,bash]
+----
+# Development environment
+terraform workspace select dev
+terraform apply
+# Produces: rg-enso-weba-uks-dev-abcd
+
+# Production environment
+terraform workspace select prod
+terraform apply
+# Produces: rg-enso-weba-uks-prod-efgh
+----

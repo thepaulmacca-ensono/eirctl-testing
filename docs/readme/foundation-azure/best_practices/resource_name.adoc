@@ -1,0 +1,38 @@
+=== Resource Name Lengths
+
+Azure has strict name length requirements for different resource types:
+
+[cols="1,1,3"]
+|===
+|Resource Type |Max Length |Recommendation
+
+|Storage Account
+|3-24 characters
+|Use `short_name_length = 3` for very long company/project names
+
+|Key Vault
+|3-24 characters
+|Keep company and project names concise
+
+|Resource Group
+|1-90 characters
+|Standard naming works well
+
+|Container Registry
+|5-50 characters
+|Standard naming works well
+|===
+
+[TIP]
+====
+If you encounter name length issues, reduce `short_name_length`:
+
+[source,hcl]
+----
+module "foundation" {
+  source            = "./stacks-foundation-azure"
+  short_name_length = 3  # Instead of default 4
+  # ... other variables
+}
+----
+====

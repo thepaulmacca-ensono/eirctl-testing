@@ -1,0 +1,6 @@
+== Migration Guide
+
+include::manual.adoc[]
+
+include::other.adoc[]
+

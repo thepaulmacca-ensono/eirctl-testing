@@ -1,0 +1,12 @@
+=== Region Selection
+
+[source,hcl]
+----
+# Use region filtering for compliance
+module "foundation" {
+  source                  = "./stacks-foundation-azure"
+  region_geography        = "Europe"        # GDPR compliance
+  region_recommend_filter = true            # Only recommended regions
+  # ... other variables
+}
+----

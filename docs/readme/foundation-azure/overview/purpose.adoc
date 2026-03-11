@@ -1,0 +1,7 @@
+=== Purpose
+
+* **Standardized Naming** - Automatically generates Azure resource names following best practices
+* **Regional Configuration** - Manages Azure region selection with geography and recommendation filtering
+* **Unique Identification** - Prevents resource name collisions through unique seed generation
+* **Multi-Project Support** - Supports multiple projects within a single deployment
+* **Extended Resource Support** - Includes custom naming for Azure Fabric, Front Door, AI services, and more

@@ -1,0 +1,11 @@
+== Best Practices
+
+include::resource_name.adoc[]
+
+include::work_space.adoc[]
+
+include::company_name.adoc[]
+
+include::project_name.adoc[]
+
+include::region_selection.adoc[]

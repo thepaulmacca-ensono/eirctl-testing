@@ -1,0 +1,23 @@
+=== Workspace Strategy
+
+Use Terraform workspaces to differentiate environments:
+
+[source,bash]
+----
+# Create workspaces for each environment
+terraform workspace new dev
+terraform workspace new test
+terraform workspace new prod
+
+# Always verify current workspace
+terraform workspace show
+
+# Deploy to specific environment
+terraform workspace select prod
+terraform apply
+----
+
+[WARNING]
+====
+Always verify the active workspace before applying changes. Resource names include the workspace name, so incorrect workspace selection will deploy to the wrong environment.
+====

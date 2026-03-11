@@ -159,9 +159,9 @@ tasks:
 
   terraform:docs:
     context: infra
-    description: Generate Terraform Module Documentation
+    description: Generate documentation for the Terraform modules
     command: |
-      terraform-docs $env:TF_FILE_LOCATION
+      terraform-docs -c .terraform-docs.yml $env:TF_FILE_LOCATION
 
       git config --global --add safe.directory /eirctl
       git diff --exit-code . ":(exclude)$env:TF_FILE_LOCATION/.terraform.lock.hcl"
@@ -233,7 +233,7 @@ tasks:
   # Documentation
   docs:docbook:
     context: asciidoc
-    description: Convert Documentation to Docbook for conversion to Markdown
+    description: Convert documentation to Docbook for conversion to Markdown
     command:
       - asciidoctor -b docbook -o outputs/tmp/README.xml docs/readme/index.adoc
 
@@ -245,9 +245,12 @@ tasks:
 
   docs:generate:
     context: asciidoc
-    description: Build Docs for the Module
+    description: Build documentation for the Module
     command: |
       Build-Documentation -Config /eirctl/docs/repository/conf/docs.json
+    required:
+      env:
+        - BUILDNUMBER
 
   # Build
   build:clean:

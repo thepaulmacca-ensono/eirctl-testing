@@ -1,0 +1,35 @@
+=== Components
+
+[cols="1,3,2"]
+|===
+|Component |Description |Example
+
+|Resource Prefix
+|Azure resource type abbreviation
+|`rg`, `st`, `kv`, `app`
+
+|Company Short
+|First N characters of company name
+|`enso` (from "Ensono")
+
+|Project Short
+|First N characters of project name
+|`weba` (from "webapp")
+
+|Region Code
+|Geographic code for Azure region
+|`uks` (UK South)
+
+|Workspace
+|Terraform workspace (environment)
+|`dev`, `test`, `prod`
+
+|Seed
+|4-character random string
+|`abcd`
+|===
+
+[NOTE]
+====
+Short name length is controlled by `var.short_name_length` (default: 4)
+====

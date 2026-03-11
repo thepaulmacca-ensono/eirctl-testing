@@ -1,0 +1,110 @@
+== Build System
+
+=== Overview
+
+The repository uses **eirctl** (Ensono Infrastructure CLI) as its build orchestration tool. The build system:
+
+1. Generates Terraform API documentation
+2. Converts AsciiDoc documentation to Markdown
+3. Assembles the distributable module
+4. Creates a zip package
+
+=== Build Pipeline
+
+The build pipeline is defined in `eirctl.yaml`:
+
+[source,yaml]
+----
+pipelines:
+  build:
+    - task: build:clean
+    - task: terraform:docs
+    - task: docs:docbook
+    - task: docs:markdown
+    - task: build:copy
+    - task: build:package
+----
+
+==== Pipeline Tasks
+
+[cols="1,3"]
+|===
+|Task |Description
+
+|`build:clean`
+|Removes the `outputs/` directory and recreates `outputs/module/`
+
+|`terraform:docs`
+|Runs `terraform-docs` to generate API documentation from Terraform source code into `docs/readme/tfdocs.adoc`
+
+|`docs:docbook`
+|Converts `docs/readme/index.adoc` to DocBook XML format at `outputs/tmp/README.xml`
+
+|`docs:markdown`
+|Converts DocBook XML to GitHub-flavored Markdown at `outputs/module/README.md`
+
+|`build:copy`
+|Copies all files from `src/*` to `outputs/module/` (excludes tests, .terraform, .terraform.lock.hcl)
+
+|`build:package`
+|Creates `outputs/stacks-foundation-azure.zip` from `outputs/module/`
+|===
+
+=== Running the Build
+
+[source,bash]
+----
+# Run the complete build pipeline
+eirctl build
+
+# Run individual tasks
+eirctl run terraform:docs
+eirctl run docs:markdown
+----
+
+=== Build Contexts
+
+The build uses containerized contexts defined in `build/eirctl/contexts.yaml`:
+
+[cols="1,2,3"]
+|===
+|Context |Container |Purpose
+
+|`powershell`
+|`ensono/eir-foundation-powershell`
+|PowerShell tasks (clean, copy, package)
+
+|`infra`
+|`ensono/eir-infrastructure`
+|Terraform tooling (terraform-docs)
+
+|`asciidoc`
+|`ensono/eir-asciidoctor`
+|Documentation conversion (asciidoctor, pandoc)
+|===
+
+=== Build Output
+
+After running `eirctl build`, the following are created in `outputs/`:
+
+[cols="1,3"]
+|===
+|Path |Contents
+
+|`outputs/module/`
+|Complete module with all `.tf` files and `README.md`
+
+|`outputs/module/README.md`
+|Module documentation converted to Markdown from AsciiDoc
+
+|`outputs/tmp/README.xml`
+|Intermediate DocBook XML (for conversion)
+
+|`outputs/stacks-foundation-azure.zip`
+|Distributable package containing the complete module
+|===
+
+[IMPORTANT]
+====
+The `outputs/` directory is gitignored and should not be committed to version control.
+====

@@ -1,0 +1,44 @@
+== Repository Structure
+
+[source]
+----
+stacks-foundation-azure/
+├── src/                          # Terraform source code
+│   ├── naming.tf                 # Azure naming module integration
+│   ├── regions.tf                # Azure regions configuration
+│   ├── variables.tf              # Input variables
+│   ├── outputs.tf                # Module outputs
+│   ├── locals.tf                 # Local values and transformations
+│   ├── random_string.tf          # Unique seed generation
+│   ├── time_static.tf            # State time tracking
+│   ├── envvar_files.tf           # Environment file generation
+│   ├── providers.tf              # Provider configuration
+│   └── templates/                # Template files for env generation
+│       ├── envvars.bash.tpl      # Bash environment variables
+│       ├── envvars.ps1.tpl       # PowerShell environment variables
+│       └── inputs.auto.tfvars.tpl  # Terraform auto-variables
+├── docs/                         # Documentation
+│   ├── REPOSITORY.adoc           # Legacy single-file repo guide
+│   ├── repository/               # Repository documentation (modular)
+│   │   ├── index.adoc            # Main repository guide
+│   │   └── *.adoc                # Individual section files
+│   └── readme/                   # Module documentation (packaged)
+│       ├── index.adoc            # Module readme entry point
+│       └── tfdocs.adoc           # Auto-generated API docs
+├── build/                        # Build system configuration
+│   ├── eirctl/                   # eirctl configuration
+│   │   ├── tasks.yaml            # Build task definitions
+│   │   └── contexts.yaml         # Container context definitions
+│   └── scripts/                  # Build scripts
+│       └── Create-TFModuleZip.ps1
+├── outputs/                      # Build output (gitignored)
+│   ├── module/                   # Assembled module
+│   ├── tmp/                      # Temporary build files
+│   └── stacks-foundation-azure.zip  # Final package
+├── .github/
+│   └── copilot-context.md        # GitHub Copilot context file
+├── .gitignore
+├── .terraform-docs.yml           # terraform-docs configuration
+├── eirctl.yaml                   # Build pipeline definition
+└── LICENSE
+----

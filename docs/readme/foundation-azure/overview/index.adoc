@@ -1,0 +1,7 @@
+== Overview
+
+The **Stacks Foundation Azure** module is a foundational Terraform module that provides standardized naming conventions and regional configurations for Azure resources. This module ensures consistency across all Azure infrastructure deployments by generating resource names that follow organizational standards and best practices.
+
+include::purpose.adoc[]
+
+include::key_features.adoc[]
