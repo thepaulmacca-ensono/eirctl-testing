@@ -16,6 +16,11 @@ jobs:
       - checkout: self
         fetchDepth: 1
 
+      - template: docker_cache.yml
+        parameters:
+          context: infra
+          context_label: Infrastructure
+
       - template: setup.yml
         parameters:
           eirctl_version: ${{ parameters.eirctl_version }}

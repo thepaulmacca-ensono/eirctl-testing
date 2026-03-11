@@ -1,0 +1,44 @@
+parameters:
+  - name: context
+    type: string
+  - name: context_label
+    type: string
+
+steps:
+  - task: Bash@3
+    name: get_image
+    displayName: "Get ${{ parameters.context_label }} Container Image Name"
+    inputs:
+      targetType: inline
+      script: |
+        IMAGE=$(grep -A2 '${{ parameters.context }}:' build/eirctl/contexts.yaml | grep 'name:' | awk '{print $2}')
+        if [ -z "$IMAGE" ]; then
+          echo "##vso[task.logissue type=error]Failed to resolve ${{ parameters.context }} image from build/eirctl/contexts.yaml"
+          exit 1
+        fi
+        echo "Resolved image: $IMAGE"
+        echo "##vso[task.setvariable variable=DOCKER_IMAGE;isOutput=true]$IMAGE"
+
+  - task: Cache@2
+    displayName: "Cache ${{ parameters.context_label }} Docker Image"
+    inputs:
+      key: 'docker | "$(get_image.DOCKER_IMAGE)"'
+      path: $(Pipeline.Workspace)/.docker-cache-${{ parameters.context }}
+      cacheHitVar: DOCKER_CACHE_RESTORED
+
+  - task: Bash@3
+    displayName: "Restore ${{ parameters.context_label }} Docker Image from Cache"
+    condition: eq(variables.DOCKER_CACHE_RESTORED, 'true')
+    inputs:
+      targetType: inline
+      script: docker load -i $(Pipeline.Workspace)/.docker-cache-${{ parameters.context }}/${{ parameters.context }}-image.tar
+
+  - task: Bash@3
+    displayName: "Pull and Save ${{ parameters.context_label }} Docker Image"
+    condition: ne(variables.DOCKER_CACHE_RESTORED, 'true')
+    inputs:
+      targetType: inline
+      script: |
+        docker pull $(get_image.DOCKER_IMAGE)
+        mkdir -p $(Pipeline.Workspace)/.docker-cache-${{ parameters.context }}
+        docker save $(get_image.DOCKER_IMAGE) -o $(Pipeline.Workspace)/.docker-cache-${{ parameters.context }}/${{ parameters.context }}-image.tar
