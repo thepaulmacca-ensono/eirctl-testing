@@ -51,7 +51,7 @@ tasks:
       and produces JUnit XML results at test-results/psscriptanalyzer-results.xml.
 
       Set PSSCRIPTANALYZER_EXCLUDE_RULES to a comma-separated list of rule names
-      to exclude (default: PSAvoidUsingWriteHost).
+      to exclude (default: PSAvoidUsingWriteHost, PSUseBOMForUnicodeEncodedFile).
       Set PSSCRIPTANALYZER_PATH to override the search directory (default: current directory).
     command: |
       $searchPath = if ($env:PSSCRIPTANALYZER_PATH) { $env:PSSCRIPTANALYZER_PATH } else { "." }

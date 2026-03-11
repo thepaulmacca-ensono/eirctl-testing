@@ -13,9 +13,6 @@ jobs:
       TF_FILE_LOCATION: "src/${{ parameters.module_name }}/deploy/terraform"
       TFLINT_CONFIG: "src/${{ parameters.module_name }}/.tflint.hcl"
     steps:
-      - checkout: self
-        fetchDepth: 1
-
       - template: setup.yml
         parameters:
           eirctl_version: ${{ parameters.eirctl_version }}

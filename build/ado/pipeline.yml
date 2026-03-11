@@ -52,9 +52,6 @@ stages:
       - job: Build_Lint
         displayName: Set Build Number and Lint
         steps:
-          - checkout: self
-            fetchDepth: 1
-
           - template: templates/setup.yml
             parameters:
               eirctl_version: $(eirctl_version)
@@ -111,9 +108,6 @@ stages:
           - job: Generate_Documentation
             displayName: Generate Documentation
             steps:
-              - checkout: self
-                fetchDepth: 1
-
               - template: templates/setup.yml
                 parameters:
                   eirctl_version: $(eirctl_version)
@@ -145,9 +139,6 @@ stages:
           - job: Build_${{ replace(module.name, '-', '_') }}
             displayName: "Build ${{ module.display_name }}"
             steps:
-              - checkout: self
-                fetchDepth: 1
-
               - template: templates/setup.yml
                 parameters:
                   eirctl_version: $(eirctl_version)
@@ -187,9 +178,6 @@ stages:
       - job: Create_GitHub_Release
         displayName: Create GitHub Release
         steps:
-          - checkout: self
-            fetchDepth: 1
-
           - ${{ if eq(parameters.generate_documentation, true) }}:
               - task: DownloadPipelineArtifact@2
                 displayName: Download Documentation Artifact

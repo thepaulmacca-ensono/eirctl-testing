@@ -51,3 +51,6 @@ test-results/
 # Eirctl
 .eirctl/
 eirctl.env
+
+outputs
+!docs/readme/outputs
