@@ -20,7 +20,7 @@ jobs:
         displayName: Run Terraform Linting Checks
         inputs:
           targetType: inline
-          script: eirctl terraform:lint
+          script: eirctl lint
 
       - task: PublishTestResults@2
         displayName: Publish TFLint Results

@@ -22,10 +22,8 @@ pipelines:
   scan:
     - task: scan:terraform:checkov
 
-  terraform:lint:
-    - task: lint:terraform:format
+  lint:
     - task: lint:terraform:validate
-      depends_on: lint:terraform:format
     - task: lint:terraform:tflint
       depends_on: lint:terraform:validate
 

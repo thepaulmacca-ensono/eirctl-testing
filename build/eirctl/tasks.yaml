@@ -148,13 +148,13 @@ tasks:
     description: |
       Perform Terraform format check
 
+      Optionally set TF_FILE_LOCATION to scope the check to a specific directory.
+      Without it, checks all .tf files recursively from the working directory.
       Set TF_DEBUG=true to enable debug output
     command: |
       $debugFlag = @{}; if ($env:TF_DEBUG -eq 'true') { $debugFlag = @{ Debug = $true } }
-      Invoke-Terraform -Format -Path $env:TF_FILE_LOCATION @debugFlag
-    required:
-      env:
-        - TF_FILE_LOCATION
+      $pathFlag = @{}; if ($env:TF_FILE_LOCATION) { $pathFlag = @{ Path = $env:TF_FILE_LOCATION } }
+      Invoke-Terraform -Format @pathFlag @debugFlag
 
   lint:terraform:validate:
     context: infra
@@ -338,6 +338,7 @@ tasks:
       $zipPath = ("outputs/{0}-{1}.zip" -f $env:TF_MODULE_NAME, $buildNumber)
       Write-Host ("Creating package: {0}" -f $zipPath)
       Compress-Archive -Path outputs/module/* -DestinationPath $zipPath -Force -ErrorAction Stop
+      Remove-Item -Path outputs/module -Recurse -Force
     required:
       env:
         - TF_MODULE_NAME

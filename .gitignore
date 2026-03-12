@@ -54,3 +54,5 @@ eirctl.env
 
 outputs
 !docs/readme/outputs
+
+.terraform.lock.hcl

@@ -71,6 +71,13 @@ stages:
                 eirctl lint:yaml
 
           - task: Bash@3
+            displayName: Perform Terraform Format Check
+            inputs:
+              targetType: inline
+              script: |
+                eirctl lint:terraform:format
+
+          - task: Bash@3
             displayName: Lint PowerShell in Task Definitions
             inputs:
               targetType: inline
