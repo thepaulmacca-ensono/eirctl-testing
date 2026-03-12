@@ -5,12 +5,12 @@ Deploy hub networks in two regions for redundancy:
 [source,hcl]
 ----
 module "hub_primary" {
-  source   = "./src/connectivity-landing-zone-hub-spoke/deploy/terraform"
+  source   = "./src/connectivity-landing-zone-hub-spoke"
   location = "uksouth"
 }
 
 module "hub_secondary" {
-  source   = "./src/connectivity-landing-zone-hub-spoke/deploy/terraform"
+  source   = "./src/connectivity-landing-zone-hub-spoke"
   location = "ukwest"
 }
 ----

@@ -5,12 +5,12 @@ Deploy identity infrastructure peered to the connectivity hub:
 [source,hcl]
 ----
 module "hub" {
-  source   = "./src/connectivity-landing-zone-hub-spoke/deploy/terraform"
+  source   = "./src/connectivity-landing-zone-hub-spoke"
   location = "uksouth"
 }
 
 module "identity" {
-  source   = "./src/identity-landing-zone/deploy/terraform"
+  source   = "./src/identity-landing-zone"
   location = "uksouth"
 }
 

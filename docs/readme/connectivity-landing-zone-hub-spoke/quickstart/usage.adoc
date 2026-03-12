@@ -3,7 +3,7 @@
 [source,hcl]
 ----
 module "hub_spoke" {
-  source = "./src/connectivity-landing-zone-hub-spoke/deploy/terraform"
+  source = "./src/connectivity-landing-zone-hub-spoke"
 
   location = "uksouth"
 }

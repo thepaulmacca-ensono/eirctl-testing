@@ -4,7 +4,7 @@ The module uses an `eirctl.env` file for environment-specific settings:
 
 [source,bash]
 ----
-TF_FILE_LOCATION=deploy/terraform
+TF_FILE_LOCATION=.
 ENVIRONMENT_NAME=dev
 TF_BACKEND_RG=rg-tfstate
 TF_BACKEND_SA=satfstate

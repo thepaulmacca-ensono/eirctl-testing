@@ -10,8 +10,7 @@ jobs:
   - job: validate_${{ replace(parameters.module_name, '-', '_') }}
     displayName: "Validate ${{ parameters.display_name }} Module"
     variables:
-      TF_FILE_LOCATION: "src/${{ parameters.module_name }}/deploy/terraform"
-      TFLINT_CONFIG: "src/${{ parameters.module_name }}/.tflint.hcl"
+      TF_FILE_LOCATION: "src/${{ parameters.module_name }}"
     steps:
       - template: setup.yml
         parameters:

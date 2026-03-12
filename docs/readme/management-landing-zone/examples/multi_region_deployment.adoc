@@ -5,12 +5,12 @@ Deploy management resources across multiple regions:
 [source,hcl]
 ----
 module "management_uk" {
-  source   = "./src/management-landing-zone/deploy/terraform"
+  source   = "./src/management-landing-zone"
   location = "uksouth"
 }
 
 module "management_eu" {
-  source   = "./src/management-landing-zone/deploy/terraform"
+  source   = "./src/management-landing-zone"
   location = "westeurope"
 }
 ----

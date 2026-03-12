@@ -3,7 +3,7 @@
 [source,hcl]
 ----
 module "vwan" {
-  source = "./src/connectivity-landing-zone-virtual-wan/deploy/terraform"
+  source = "./src/connectivity-landing-zone-virtual-wan"
 
   location = "uksouth"
 }

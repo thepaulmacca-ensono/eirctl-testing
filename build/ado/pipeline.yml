@@ -12,7 +12,7 @@ parameters:
     default: true
 
   - name: modules
-    displayName: Modules to Validate/Publish
+    displayName: Modules to Publish
     type: object
     default:
       - name: management-landing-zone
@@ -113,7 +113,7 @@ stages:
                   eirctl_version: $(eirctl_version)
 
               - task: Bash@3
-                displayName: Generate Documentation for Modules
+                displayName: Generate Repository Documentation
                 inputs:
                   targetType: inline
                   script: |
@@ -123,7 +123,7 @@ stages:
 
               # Upload the documentation as a pipeline artifact
               - task: PublishPipelineArtifact@1
-                displayName: Publish Documentation
+                displayName: Publish Repository Documentation
                 inputs:
                   targetPath: $(Build.SourcesDirectory)/outputs/docs
                   artifact: docs
@@ -150,9 +150,9 @@ stages:
                   script: |
                     eirctl build
                 env:
-                  TF_FILE_LOCATION: "src/${{ module.name }}/deploy/terraform"
+                  TF_FILE_LOCATION: "src/${{ module.name }}"
                   TF_MODULE_NAME: ${{ module.name }}
-                  ADOC_INPUT_FILE: "docs/readme/${{ module.name }}/index.adoc"
+                  ADOC_INDEX_FILE: "docs/readme/${{ module.name }}/index.adoc"
 
               # Upload the zip file as a pipeline artifact
               - task: PublishPipelineArtifact@1
@@ -161,11 +161,11 @@ stages:
                   targetPath: $(Build.SourcesDirectory)/outputs
                   artifact: ${{ module.name }}
 
-              - task: PublishPipelineArtifact@1
-                displayName: Publish README file
-                inputs:
-                  targetPath: $(Build.SourcesDirectory)/outputs/module/README.md
-                  artifact: readme
+              # - task: PublishPipelineArtifact@1
+              #   displayName: Publish README file
+              #   inputs:
+              #     targetPath: $(Build.SourcesDirectory)/outputs/module/README.md
+              #     artifact: readme
 
   - stage: Release
     dependsOn:
@@ -195,10 +195,10 @@ stages:
                   patterns: "**/*.zip"
                   path: $(Build.SourcesDirectory)/outputs/assets
 
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: readme
-              path: $(Build.SourcesDirectory)/outputs/assets
+          # - task: DownloadPipelineArtifact@2
+          #   inputs:
+          #     artifact: readme
+          #     path: $(Build.SourcesDirectory)/outputs/assets
 
           - template: templates/setup.yml
             parameters:

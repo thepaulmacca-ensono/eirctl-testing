@@ -5,12 +5,12 @@ For disaster recovery, deploy identity infrastructure in a secondary region with
 [source,hcl]
 ----
 module "identity_primary" {
-  source   = "./src/identity-landing-zone/deploy/terraform"
+  source   = "./src/identity-landing-zone"
   location = "uksouth"
 }
 
 module "identity_secondary" {
-  source   = "./src/identity-landing-zone/deploy/terraform"
+  source   = "./src/identity-landing-zone"
   location = "ukwest"
 }
 ----

@@ -11,7 +11,7 @@ provider "azurerm" {
 }
 
 module "management" {
-  source = "./src/management-landing-zone/deploy/terraform"
+  source = "./src/management-landing-zone"
 
   providers = {
     azurerm = azurerm.management

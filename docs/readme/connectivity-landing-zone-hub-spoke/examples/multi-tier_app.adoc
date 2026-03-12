@@ -5,7 +5,7 @@ Deploy a hub network and peer a workload spoke:
 [source,hcl]
 ----
 module "hub" {
-  source   = "./src/connectivity-landing-zone-hub-spoke/deploy/terraform"
+  source   = "./src/connectivity-landing-zone-hub-spoke"
   location = "uksouth"
 }
 

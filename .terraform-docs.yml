@@ -20,7 +20,7 @@ sections:
 content: ""
 
 output:
-  file: "../docs/readme/tfdocs.adoc"
+  file: ""
   mode: inject
   template: |-
     <!-- BEGIN_TF_DOCS -->

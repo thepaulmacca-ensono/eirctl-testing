@@ -2,7 +2,7 @@ tasks:
   # ADO
   ado:build:number:
     context: powershell
-    description: Update the Build Number in Azure DevOps
+    description: Update the build number in Azure DevOps
     command:
       - Update-BuildNumber -BuildNumber $env:BUILD_BUILDNUMBER
 
@@ -32,11 +32,12 @@ tasks:
       env:
         - ADO_ACCESS_TOKEN
 
-  # Linting
+  # Security
+  ## Linting
   lint:yaml:
     context: infra
     description: |
-      Perform YAML Linting using Yamllint
+      Perform YAML linting using yamllint
 
       By default the utility uses `yamllint.conf` in the current directory
     command:
@@ -122,10 +123,27 @@ tasks:
       }
       if ($failCount -gt 0) { exit 1 }
 
-  # Terraform
+  ## Scanning
+  scan:terraform:checkov:
+    context: infra
+    description: Perform Terraform static code analysis using Checkov
+    command: |
+      $pkg = if ($env:CHECKOV_VERSION) { "checkov==$env:CHECKOV_VERSION" } else { "checkov" }
+      pip3 -q install -U $pkg
+      if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      New-Item -ItemType Directory -Path test-results -Force | Out-Null
+      checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,test-results/checkov-results.xml
+      exit $LASTEXITCODE
+    required:
+      env:
+        - TF_FILE_LOCATION
+
+  # Infra
+  ## Terraform
   lint:terraform:format:
     context: infra
-    description: Perform Terraform Format Check
+    description: Perform Terraform format check
     command:
       - Invoke-Terraform -Format -Path $env:TF_FILE_LOCATION -Debug
     required:
@@ -134,7 +152,7 @@ tasks:
 
   lint:terraform:validate:
     context: infra
-    description: Perform Terraform Validation
+    description: Perform Terraform validate
     command:
       - Invoke-Terraform -Validate -Path $env:TF_FILE_LOCATION -Debug
     required:
@@ -144,27 +162,35 @@ tasks:
   lint:terraform:tflint:
     context: infra
     description: |
-      Perform Terraform Linting using TFLint
+      Perform Terraform linting using TFLint
 
-      Set TFLINT_CONFIG to the path of the TFLint configuration file.
+      Set TFLINT_CONFIG to override the default TFLint configuration file (.tflint.hcl).
     command: |
-      $configArg = if ($env:TFLINT_CONFIG) { "--config=$PWD/$env:TFLINT_CONFIG" }
+      $configPath = if ($env:TFLINT_CONFIG) { $env:TFLINT_CONFIG } else { ".tflint.hcl" }
+      $configArg = "--config=$PWD/$configPath"
       tflint --init --chdir=$env:TF_FILE_LOCATION $configArg
+      if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       New-Item -ItemType Directory -Path test-results -Force | Out-Null
       tflint --chdir=$env:TF_FILE_LOCATION $configArg --format=junit | Out-File test-results/tflint-results.xml -Encoding UTF8
       tflint --chdir=$env:TF_FILE_LOCATION $configArg
+      exit $LASTEXITCODE
     required:
       env:
         - TF_FILE_LOCATION
 
   terraform:docs:
     context: infra
-    description: Generate documentation for the Terraform modules
+    description: Generate Terraform module documentation
     command: |
-      terraform-docs -c .terraform-docs.yml $env:TF_FILE_LOCATION
+      $moduleName = Split-Path $env:TF_FILE_LOCATION -Leaf
+      $outputFile = "docs/readme/$moduleName/tfdocs.adoc"
+
+      terraform-docs -c .terraform-docs.yml --output-file $outputFile $env:TF_FILE_LOCATION
+      if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       git config --global --add safe.directory /eirctl
       git diff --exit-code . ":(exclude)$env:TF_FILE_LOCATION/.terraform.lock.hcl"
+      exit $LASTEXITCODE
     required:
       env:
         - TF_FILE_LOCATION
@@ -193,10 +219,11 @@ tasks:
 
   terraform:init:false:
     context: infra
-    description: Initialise Terraform with False Backend (for CI validation)
+    description: Initialise Terraform with false backend
     command: |
       Set-Location $env:TF_FILE_LOCATION
       terraform init -backend=false
+      exit $LASTEXITCODE
     required:
       env:
         - TF_FILE_LOCATION
@@ -211,50 +238,52 @@ tasks:
       New-Item -ItemType Directory -Path test-results -Force | Out-Null
       $filter = if ($env:TF_TEST_FILTER) { "-filter=$($env:TF_TEST_FILTER)" }
       terraform "-chdir=$env:TF_FILE_LOCATION" test -junit-xml="$PWD/test-results/terraform-test-results.xml" $filter
+      $tfExitCode = $LASTEXITCODE
       chmod 644 test-results/terraform-test-results.xml
+      exit $tfExitCode
     required:
       env:
         - TF_FILE_LOCATION
 
-  # Scanning
-  scan:terraform:checkov:
-    context: infra
-    description: Perform Terraform Static Code Analysis using Checkov
-    command: |
-      $pkg = if ($env:CHECKOV_VERSION) { "checkov==$env:CHECKOV_VERSION" } else { "checkov" }
-      pip3 -q install -U $pkg
-
-      New-Item -ItemType Directory -Path test-results -Force | Out-Null
-      checkov -d $env:TF_FILE_LOCATION -o cli -o junitxml --output-file-path console,test-results/checkov-results.xml
-    required:
-      env:
-        - TF_FILE_LOCATION
-
-  # Documentation
+  # Docs
   docs:docbook:
     context: asciidoc
     description: |
-      Convert AsciiDoc documentation to Docbook XML for conversion to Markdown.
+      Convert AsciiDoc documentation to Docbook for conversion to Markdown
 
-      Set ADOC_INPUT_FILE to the path of the AsciiDoc index file (e.g., docs/readme/<module_name>/index.adoc).
+      Set ADOC_INDEX_FILE to the path of the AsciiDoc index file
+      (e.g., docs/readme/index.adoc or docs/readme/<module_name>/index.adoc).
     command: |
+      if (-not (Test-Path "docs/readme")) {
+        Write-Error "docs/readme directory not found"
+        exit 1
+      }
       New-Item -ItemType Directory -Path outputs/tmp -Force | Out-Null
-      asciidoctor -b docbook -o outputs/tmp/README.xml $env:ADOC_INPUT_FILE
+      asciidoctor -b docbook -o outputs/tmp/README.xml $env:ADOC_INDEX_FILE
+      exit $LASTEXITCODE
     required:
       env:
-        - ADOC_INPUT_FILE
+        - ADOC_INDEX_FILE
 
   docs:markdown:
     context: asciidoc
     description: Convert the Docbook README to Markdown
-    command:
-      - pandoc -f docbook -t gfm -o outputs/module/README.md outputs/tmp/README.xml
+    command: |
+      pandoc -f docbook -t gfm -o outputs/module/README.md outputs/tmp/README.xml
+      if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      Remove-Item -Path outputs/tmp -Recurse -Force
 
   docs:generate:
     context: asciidoc
-    description: Build documentation for the Module
+    description: Build AsciiDoc documentation
     command: |
-      Build-Documentation -Config /eirctl/docs/repository/conf/docs.json
+      $configPath = "/eirctl/docs/repository/conf/docs.json"
+      if (-not (Test-Path $configPath)) {
+        Write-Error "Configuration file not found: $configPath"
+        exit 1
+      }
+      Build-Documentation -Config $configPath
+      if (-not $?) { exit 1 }
     required:
       env:
         - BUILDNUMBER
@@ -262,16 +291,16 @@ tasks:
   # Build
   build:clean:
     context: powershell
-    description: Clean the outputs folder
+    description: Clean outputs folder
     command: |
       Remove-Item -Path outputs -Recurse -Force -ErrorAction SilentlyContinue
       New-Item -ItemType Directory -Path outputs/module -Force | Out-Null
 
   build:copy:
     context: powershell
-    description: Copy the Terraform module into the outputs/module folder
+    description: Copy Terraform module into outputs/module folder
     command: |
-      Copy-Item -Path ${env:TF_FILE_LOCATION}/* -Destination outputs/module/ -Recurse -Force -Exclude tests,.terraform,.terraform.lock.hcl
+      Copy-Item -Path ${env:TF_FILE_LOCATION}/* -Destination outputs/module/ -Recurse -Force -Exclude tests,.terraform,.terraform.lock.hcl -ErrorAction Stop
     required:
       env:
         - TF_FILE_LOCATION
@@ -279,7 +308,7 @@ tasks:
   build:package:
     context: powershell
     description: |
-      Create zip package for the Terraform module
+      Create zip package for Terraform module
 
       Requires TF_MODULE_NAME to identify the module.
       Resolves build number from BUILD_BUILDNUMBER or GITHUB_RUN_NUMBER.
@@ -297,7 +326,7 @@ tasks:
 
       $zipPath = ("outputs/{0}-{1}.zip" -f $env:TF_MODULE_NAME, $buildNumber)
       Write-Host ("Creating package: {0}" -f $zipPath)
-      Compress-Archive -Path outputs/module/* -DestinationPath $zipPath -Force
+      Compress-Archive -Path outputs/module/* -DestinationPath $zipPath -Force -ErrorAction Stop
     required:
       env:
         - TF_MODULE_NAME
@@ -355,38 +384,37 @@ tasks:
       $tagName = "v$version"
       Write-Host "Tagging commit $commitId as $tagName"
       git tag $tagName $commitId
+      if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       git push origin $tagName
+      exit $LASTEXITCODE
 
   ## Release
   github:release:
     context: powershell
     description: |
-      Publish a Release to GitHub
+      Publish a GitHub Release
 
-      Resolves version from BUILD_BUILDNUMBER or GITHUB_RUN_NUMBER.
-      Resolves commit ID from BUILD_SOURCEVERSION (ADO) or GITHUB_SHA (GHA).
-      ARTIFACTS_DIR defaults to outputs/assets if not set.
+      Optional env vars: ARTIFACTS_DIR (default: outputs/assets), UPLOAD_ARTIFACTS (default: true),
+      PUBLISH_RELEASE (default: true).
     command: |
-      $repoFullName = if ($env:GITHUB_REPOSITORY) { $env:GITHUB_REPOSITORY } else { $env:BUILD_REPOSITORY_NAME }
-      if (-not $repoFullName) {
-        Write-Error "GITHUB_REPOSITORY or BUILD_REPOSITORY_NAME environment variable is required"
-        exit 1
-      }
-      $owner = ($repoFullName -split '/')[0]
-      $repo = ($repoFullName -split '/')[-1]
+      if (-not $env:PUBLISH_RELEASE) { $env:PUBLISH_RELEASE = 'true' }
+
+      $repoFullName = if ($env:GITHUB_REPOSITORY) { $env:GITHUB_REPOSITORY }
+        elseif ($env:BUILD_REPOSITORY_URI -match 'github\.com[/:]([^/]+)/([^/.]+)') { "$($Matches[1])/$($Matches[2])" }
+        else { $null }
+      if (-not $repoFullName) { Write-Error "Cannot resolve GitHub owner/repo. Requires a GitHub repository as the source."; exit 1 }
 
       $version = if ($env:BUILD_BUILDNUMBER) { $env:BUILD_BUILDNUMBER } else { $env:GITHUB_RUN_NUMBER }
-      if (-not $version) {
-        Write-Error "BUILD_BUILDNUMBER or GITHUB_RUN_NUMBER environment variable is required"
-        exit 1
-      }
+      if (-not $version) { Write-Error "BUILD_BUILDNUMBER or GITHUB_RUN_NUMBER is required"; exit 1 }
 
       $commitId = if ($env:BUILD_SOURCEVERSION) { $env:BUILD_SOURCEVERSION } else { $env:GITHUB_SHA }
-
       $artifactsDir = if ($env:ARTIFACTS_DIR) { $env:ARTIFACTS_DIR } else { "outputs/assets" }
+      $uploadArtifacts = if ($env:UPLOAD_ARTIFACTS -eq 'false') { $false } else { $true }
 
-      Publish-GitHubRelease -version $version -commitId $commitId -apikey $env:GITHUB_TOKEN -artifactsDir $artifactsDir -Owner $owner -repository $repo -generateReleaseNotes $true
+      Publish-GitHubRelease -Version $version -CommitId $commitId -ApiKey $env:GITHUB_TOKEN `
+        -ArtifactsDir $artifactsDir -Owner ($repoFullName -split '/')[0] -Repository ($repoFullName -split '/')[1] `
+        -GenerateReleaseNotes $true -UploadArtifacts $uploadArtifacts
+      if (-not $?) { exit 1 }
     required:
       env:
         - GITHUB_TOKEN
-        - PUBLISH_RELEASE

@@ -3,7 +3,7 @@
 [source,hcl]
 ----
 module "management" {
-  source = "./src/management-landing-zone/deploy/terraform"
+  source = "./src/management-landing-zone"
 
   location = "uksouth"
 }

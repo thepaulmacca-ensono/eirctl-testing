@@ -5,7 +5,7 @@ Deploy management resources with a 90-day retention period for production enviro
 [source,hcl]
 ----
 module "management" {
-  source            = "./src/management-landing-zone/deploy/terraform"
+  source            = "./src/management-landing-zone"
   location          = "uksouth"
   retention_in_days = 90
 }

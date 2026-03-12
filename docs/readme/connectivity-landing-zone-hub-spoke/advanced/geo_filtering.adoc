@@ -5,12 +5,12 @@ For multi-region deployments, deploy a hub VNet per region and connect them usin
 [source,hcl]
 ----
 module "hub_uk" {
-  source   = "./src/connectivity-landing-zone-hub-spoke/deploy/terraform"
+  source   = "./src/connectivity-landing-zone-hub-spoke"
   location = "uksouth"
 }
 
 module "hub_eu" {
-  source   = "./src/connectivity-landing-zone-hub-spoke/deploy/terraform"
+  source   = "./src/connectivity-landing-zone-hub-spoke"
   location = "westeurope"
 }
 ----
