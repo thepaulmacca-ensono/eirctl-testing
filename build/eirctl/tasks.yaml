@@ -237,7 +237,7 @@ tasks:
       Set TF_DEBUG=true to enable debug output
     command: |
       Set-Location $env:TF_FILE_LOCATION
-      Invoke-Terraform -init -arguments "false"
+      terraform init -backend=false
       exit $LASTEXITCODE
     required:
       env:
