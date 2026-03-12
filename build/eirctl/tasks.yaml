@@ -40,8 +40,10 @@ tasks:
       Perform YAML linting using yamllint
 
       By default the utility uses `yamllint.conf` in the current directory
-    command:
-      - Invoke-YamlLint -FailOnWarnings $False
+      Set YAMLLINT_FAIL_ON_WARNINGS=true to enable strict mode (default: false)
+    command: |
+      $failOnWarnings = if ($env:YAMLLINT_FAIL_ON_WARNINGS -eq 'true') { $true } else { $false }
+      Invoke-YamlLint -FailOnWarnings $failOnWarnings
 
   lint:powershell:
     context: infra
@@ -49,7 +51,7 @@ tasks:
       Run PSScriptAnalyzer on PowerShell embedded in eirctl tasks
 
       Parses all YAML files under the working directory, extracts command blocks,
-      and produces JUnit XML results at test-results/psscriptanalyzer-results.xml.
+      and produces JUnit XML results at test-results/psscriptanalyzer-results.xml
 
       Set PSSCRIPTANALYZER_EXCLUDE_RULES to a comma-separated list of rule names
       to exclude (default: PSAvoidUsingWriteHost, PSUseBOMForUnicodeEncodedFile).
@@ -143,18 +145,26 @@ tasks:
   ## Terraform
   lint:terraform:format:
     context: infra
-    description: Perform Terraform format check
-    command:
-      - Invoke-Terraform -Format -Path $env:TF_FILE_LOCATION -Debug
+    description: |
+      Perform Terraform format check
+
+      Set TF_DEBUG=true to enable debug output
+    command: |
+      $debugFlag = @{}; if ($env:TF_DEBUG -eq 'true') { $debugFlag = @{ Debug = $true } }
+      Invoke-Terraform -Format -Path $env:TF_FILE_LOCATION @debugFlag
     required:
       env:
         - TF_FILE_LOCATION
 
   lint:terraform:validate:
     context: infra
-    description: Perform Terraform validate
-    command:
-      - Invoke-Terraform -Validate -Path $env:TF_FILE_LOCATION -Debug
+    description: |
+      Perform Terraform validate
+
+      Set TF_DEBUG=true to enable debug output
+    command: |
+      $debugFlag = @{}; if ($env:TF_DEBUG -eq 'true') { $debugFlag = @{ Debug = $true } }
+      Invoke-Terraform -Validate -Path $env:TF_FILE_LOCATION @debugFlag
     required:
       env:
         - TF_FILE_LOCATION
@@ -164,7 +174,7 @@ tasks:
     description: |
       Perform Terraform linting using TFLint
 
-      Set TFLINT_CONFIG to override the default TFLint configuration file (.tflint.hcl).
+      Set TFLINT_CONFIG to override the default TFLint configuration file (.tflint.hcl)
     command: |
       $configPath = if ($env:TFLINT_CONFIG) { $env:TFLINT_CONFIG } else { ".tflint.hcl" }
       $configArg = "--config=$PWD/$configPath"
@@ -183,7 +193,7 @@ tasks:
     description: Generate Terraform module documentation
     command: |
       $moduleName = Split-Path $env:TF_FILE_LOCATION -Leaf
-      $outputFile = "docs/readme/$moduleName/tfdocs.adoc"
+      $outputFile = "$PWD/docs/readme/$moduleName/tfdocs.adoc"
 
       terraform-docs -c .terraform-docs.yml --output-file $outputFile $env:TF_FILE_LOCATION
       if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -200,18 +210,21 @@ tasks:
     description: |
       Initialise Terraform
 
-      Optionally pass backend arguments via TF_BACKEND_INIT.
-      Optionally set a workspace via ENVIRONMENT_NAME.
+      Optionally pass backend arguments via TF_BACKEND_INIT
+      Optionally set a workspace via ENVIRONMENT_NAME
+      Set TF_DEBUG=true to enable debug output
     command: |
       $arguments = @()
       if ($env:TF_BACKEND_INIT) {
         $arguments += $env:TF_BACKEND_INIT
       }
 
-      Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $arguments -Debug
+      $debugFlag = @{}; if ($env:TF_DEBUG -eq 'true') { $debugFlag = @{ Debug = $true } }
+
+      Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $arguments @debugFlag
 
       if ($env:ENVIRONMENT_NAME) {
-        Invoke-Terraform -Workspace -Path $env:TF_FILE_LOCATION -Arguments $env:ENVIRONMENT_NAME -Debug
+        Invoke-Terraform -Workspace -Path $env:TF_FILE_LOCATION -Arguments $env:ENVIRONMENT_NAME @debugFlag
       }
     required:
       env:
@@ -220,9 +233,11 @@ tasks:
   terraform:init:false:
     context: infra
     description: Initialise Terraform with false backend
+
+      Set TF_DEBUG=true to enable debug output
     command: |
       Set-Location $env:TF_FILE_LOCATION
-      terraform init -backend=false
+      Invoke-Terraform -init -arguments "false"
       exit $LASTEXITCODE
     required:
       env:
@@ -252,7 +267,7 @@ tasks:
       Convert AsciiDoc documentation to Docbook for conversion to Markdown
 
       Set ADOC_INDEX_FILE to the path of the AsciiDoc index file
-      (e.g., docs/readme/index.adoc or docs/readme/<module_name>/index.adoc).
+      (e.g., docs/readme/index.adoc or docs/readme/<module_name>/index.adoc)
     command: |
       if (-not (Test-Path "docs/readme")) {
         Write-Error "docs/readme directory not found"
@@ -335,12 +350,12 @@ tasks:
   git:tag:
     context: powershell
     description: |
-      Tag a commit and push to origin.
+      Tag a commit and push to origin
 
-      Resolves version from BUILD_BUILDNUMBER (ADO) or GITHUB_RUN_NUMBER (GHA).
-      Resolves commit SHA from BUILD_SOURCEVERSION (ADO) or GITHUB_SHA (GHA).
+      Resolves version from BUILD_BUILDNUMBER (ADO) or GITHUB_RUN_NUMBER (GHA)
+      Resolves commit SHA from BUILD_SOURCEVERSION (ADO) or GITHUB_SHA (GHA)
       Authenticates using ADO_ACCESS_TOKEN/SYSTEM_ACCESSTOKEN for Azure Repos
-      or GITHUB_TOKEN for GitHub.
+      or GITHUB_TOKEN for GitHub
     command: |
       git config --global --add safe.directory /eirctl
 
@@ -395,7 +410,7 @@ tasks:
       Publish a GitHub Release
 
       Optional env vars: ARTIFACTS_DIR (default: outputs/assets), UPLOAD_ARTIFACTS (default: true),
-      PUBLISH_RELEASE (default: true).
+      PUBLISH_RELEASE (default: true)
     command: |
       if (-not $env:PUBLISH_RELEASE) { $env:PUBLISH_RELEASE = 'true' }
 

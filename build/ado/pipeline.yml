@@ -144,7 +144,7 @@ stages:
                   eirctl_version: $(eirctl_version)
 
               - task: Bash@3
-                displayName: "Build and Package ${{ module.display_name }} Module"
+                displayName: "Build ${{ module.display_name }} Module"
                 inputs:
                   targetType: inline
                   script: |
@@ -181,7 +181,7 @@ stages:
         steps:
           - ${{ if eq(parameters.generate_documentation, true) }}:
               - task: DownloadPipelineArtifact@2
-                displayName: Download Documentation Artifact
+                displayName: Download Repository Documentation Artifact
                 inputs:
                   artifact: docs
                   patterns: "**/*.pdf"
