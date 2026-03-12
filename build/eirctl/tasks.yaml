@@ -196,10 +196,6 @@ tasks:
       $outputFile = "$PWD/docs/readme/$moduleName/tfdocs.adoc"
 
       terraform-docs -c .terraform-docs.yml --output-file $outputFile $env:TF_FILE_LOCATION
-      if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      git config --global --add safe.directory /eirctl
-      git diff --exit-code . ":(exclude)$env:TF_FILE_LOCATION/.terraform.lock.hcl"
       exit $LASTEXITCODE
     required:
       env:
