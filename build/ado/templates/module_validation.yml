@@ -5,10 +5,13 @@ parameters:
     type: string
   - name: eirctl_version
     type: string
+  - name: module_changed
+    type: string
 
 jobs:
   - job: validate_${{ replace(parameters.module_name, '-', '_') }}
     displayName: "Validate ${{ parameters.display_name }} Module"
+    condition: eq(variables['${{ parameters.module_changed }}'], 'true')
     variables:
       TF_FILE_LOCATION: "src/${{ parameters.module_name }}"
     steps:

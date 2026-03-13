@@ -96,10 +96,64 @@ stages:
               failTaskOnFailedTests: true
               failTaskOnMissingResultsFile: true
 
+      - job: Detect_Changes
+        displayName: Detect Changed Modules
+        steps:
+          - checkout: self
+            fetchDepth: 0
+
+          - task: Bash@3
+            name: diff_base
+            displayName: Determine Diff Base
+            inputs:
+              targetType: inline
+              script: |
+                if [[ "$(Build.Reason)" == "PullRequest" ]]; then
+                  BASE_SHA="origin/$(System.PullRequest.TargetBranch)"
+                else
+                  BASE_SHA="HEAD~1"
+                fi
+
+                echo "Diff base: $BASE_SHA"
+                echo "##vso[task.setvariable variable=BASE_SHA;isOutput=true]$BASE_SHA"
+
+                CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD 2>/dev/null || echo "")
+
+                if [[ -z "$CHANGED_FILES" ]]; then
+                  echo "No changed files detected"
+                else
+                  echo "Changed files:"
+                  echo "$CHANGED_FILES"
+                fi
+
+          - ${{ each module in parameters.modules }}:
+              - task: Bash@3
+                name: check_${{ replace(module.name, '-', '_') }}
+                displayName: "Check changes for ${{ module.display_name }}"
+                inputs:
+                  targetType: inline
+                  script: |
+                    BASE_SHA="$(diff_base.BASE_SHA)"
+                    CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD 2>/dev/null || echo "")
+
+                    if [[ -z "$CHANGED_FILES" ]]; then
+                      echo "No changed files detected, marking module as changed"
+                      echo "##vso[task.setvariable variable=changed;isOutput=true]true"
+                    elif echo "$CHANGED_FILES" | grep -q "^src/${{ module.name }}/"; then
+                      echo "Module ${{ module.name }} has changes"
+                      echo "##vso[task.setvariable variable=changed;isOutput=true]true"
+                    else
+                      echo "Module ${{ module.name }} has no changes"
+                      echo "##vso[task.setvariable variable=changed;isOutput=true]false"
+                    fi
+
   - stage: Validate
     displayName: Validate Modules
     dependsOn:
       - Preliminaries
+    variables:
+      ${{ each module in parameters.modules }}:
+        ${{ replace(module.name, '-', '_') }}_changed: $[ stageDependencies.Preliminaries.Detect_Changes.outputs['check_${{ replace(module.name, '-', '_') }}.changed'] ]
     jobs:
       - ${{ each module in parameters.modules }}:
           - template: templates/module_validation.yml
@@ -107,6 +161,7 @@ stages:
               module_name: ${{ module.name }}
               display_name: ${{ module.display_name }}
               eirctl_version: $(eirctl_version)
+              module_changed: ${{ replace(module.name, '-', '_') }}_changed
 
   - ${{ if eq(parameters.generate_documentation, true) }}:
       - stage: Documentation
@@ -139,13 +194,18 @@ stages:
   - stage: Build
     displayName: Build Modules
     dependsOn:
+      - Preliminaries
       - Validate
       - ${{ if eq(parameters.generate_documentation, true) }}:
           - Documentation
+    variables:
+      ${{ each module in parameters.modules }}:
+        ${{ replace(module.name, '-', '_') }}_changed: $[ stageDependencies.Preliminaries.Detect_Changes.outputs['check_${{ replace(module.name, '-', '_') }}.changed'] ]
     jobs:
       - ${{ each module in parameters.modules }}:
           - job: Build_${{ replace(module.name, '-', '_') }}
             displayName: "Build ${{ module.display_name }}"
+            condition: eq(variables['${{ replace(module.name, '-', '_') }}_changed'], 'true')
             steps:
               - template: templates/setup.yml
                 parameters:
@@ -177,12 +237,16 @@ stages:
 
   - stage: Release
     dependsOn:
+      - Preliminaries
       - Build
       - ${{ if eq(parameters.generate_documentation, true) }}:
           - Documentation
     condition: and(succeeded(), or(eq(variables['is_main'], 'true'), eq(${{ parameters.pre_release }}, true)))
     variables:
       - group: github-creds
+      - ${{ each module in parameters.modules }}:
+          - name: ${{ replace(module.name, '-', '_') }}_changed
+            value: $[ stageDependencies.Preliminaries.Detect_Changes.outputs['check_${{ replace(module.name, '-', '_') }}.changed'] ]
     jobs:
       - job: Create_GitHub_Release
         displayName: Create GitHub Release
@@ -198,6 +262,7 @@ stages:
           - ${{ each module in parameters.modules }}:
               - task: DownloadPipelineArtifact@2
                 displayName: "Download ${{ module.display_name }} Module Artifact"
+                condition: eq(variables['${{ replace(module.name, '-', '_') }}_changed'], 'true')
                 inputs:
                   artifact: ${{ module.name }}
                   patterns: "**/*.zip"
