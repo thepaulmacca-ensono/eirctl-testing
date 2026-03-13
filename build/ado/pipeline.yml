@@ -1,4 +1,5 @@
-name: $(version_major).$(version_minor).$(version_revision)
+# Set the name which will define the build number
+name: $(version_semver)
 
 parameters:
   - name: pre_release

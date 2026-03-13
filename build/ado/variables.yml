@@ -6,6 +6,8 @@ variables:
     value: 0
   - name: version_revision
     value: $[counter(format('{0}.{1}', variables['version_major'], variables['version_minor']), 0)]
+  - name: version_semver
+    value: "$(version_major).$(version_minor).$(version_revision)"
 
   # Eirctl https://github.com/Ensono/eirctl/releases
   - name: eirctl_version

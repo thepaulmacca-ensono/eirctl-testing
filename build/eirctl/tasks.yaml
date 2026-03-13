@@ -188,10 +188,10 @@ tasks:
       env:
         - TF_FILE_LOCATION
 
-  terraform:docs:
+  terraform:docs:asciidoc:
     context: infra
     description: |
-      Generate Terraform module documentation
+      Generate Terraform module documentation into AsciiDoc format
 
       The .terraform-docs.yml configuration file needs to have the formatter set to "asciidoc"
     command: |
