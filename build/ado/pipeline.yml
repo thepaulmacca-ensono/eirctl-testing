@@ -220,7 +220,6 @@ stages:
                   script: |
                     eirctl release
                 env:
-                  PUBLISH_RELEASE: "true"
                   GITHUB_TOKEN: $(GITHUB_TOKEN)
                   ARTIFACTS_DIR: /eirctl/outputs/assets
                   PRERELEASE: "true"
@@ -233,6 +232,5 @@ stages:
                   script: |
                     eirctl release
                 env:
-                  PUBLISH_RELEASE: "true"
                   GITHUB_TOKEN: $(GITHUB_TOKEN)
                   ARTIFACTS_DIR: /eirctl/outputs/assets
