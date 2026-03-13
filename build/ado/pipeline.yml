@@ -179,7 +179,7 @@ stages:
       - Build
       - ${{ if eq(parameters.generate_documentation, true) }}:
           - Documentation
-    condition: and(succeeded(), or(eq(variables['is_main'], 'true'), eq('${{ parameters.pre_release }}', 'true')))
+    condition: and(succeeded(), or(eq(variables['is_main'], 'true'), eq(${{ parameters.pre_release }}, true)))
     variables:
       - group: github-creds
     jobs:

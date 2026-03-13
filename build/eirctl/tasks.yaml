@@ -190,8 +190,16 @@ tasks:
 
   terraform:docs:
     context: infra
-    description: Generate Terraform module documentation
+    description: |
+      Generate Terraform module documentation
+
+      The .terraform-docs.yml configuration file needs to have the formatter set to "asciidoc"
     command: |
+      if (-not (Test-Path "$PWD/docs/readme")) {
+        Write-Error "docs/readme directory does not exist"
+        exit 1
+      }
+
       $moduleName = Split-Path $env:TF_FILE_LOCATION -Leaf
       $outputFile = "$PWD/docs/readme/$moduleName/tfdocs.adoc"
 
@@ -228,7 +236,8 @@ tasks:
 
   terraform:init:false:
     context: infra
-    description: Initialise Terraform with false backend
+    description: |
+      Initialise Terraform with false backend
 
       Set TF_DEBUG=true to enable debug output
     command: |
@@ -295,9 +304,6 @@ tasks:
       }
       Build-Documentation -Config $configPath
       if (-not $?) { exit 1 }
-    required:
-      env:
-        - BUILDNUMBER
 
   # Build
   build:clean:
@@ -409,8 +415,6 @@ tasks:
       Optional env vars: ARTIFACTS_DIR (default: outputs/assets), UPLOAD_ARTIFACTS (default: true),
       PUBLISH_RELEASE (default: true)
     command: |
-      if (-not $env:PUBLISH_RELEASE) { $env:PUBLISH_RELEASE = 'true' }
-
       $repoFullName = if ($env:GITHUB_REPOSITORY) { $env:GITHUB_REPOSITORY }
         elseif ($env:BUILD_REPOSITORY_URI -match 'github\.com[/:]([^/]+)/([^/.]+)') { "$($Matches[1])/$($Matches[2])" }
         else { $null }
