@@ -17,13 +17,13 @@ parameters:
     type: object
     default:
       - name: management
-        display_name: Management Landing Zone
+        display_name: Management
       - name: connectivity-hub-spoke
-        display_name: Connectivity Landing Zone (Hub & Spoke)
+        display_name: Connectivity (Hub & Spoke)
       - name: connectivity-virtual-wan
-        display_name: Connectivity Landing Zone (Virtual WAN)
+        display_name: Connectivity (Virtual WAN)
       - name: identity
-        display_name: Identity Landing Zone
+        display_name: Identity
 
 trigger:
   branches:
