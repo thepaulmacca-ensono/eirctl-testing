@@ -16,13 +16,13 @@ parameters:
     displayName: Modules to Publish
     type: object
     default:
-      - name: management-landing-zone
+      - name: management
         display_name: Management Landing Zone
-      - name: connectivity-landing-zone-hub-spoke
+      - name: connectivity-hub-spoke
         display_name: Connectivity Landing Zone (Hub & Spoke)
-      - name: connectivity-landing-zone-virtual-wan
+      - name: connectivity-virtual-wan
         display_name: Connectivity Landing Zone (Virtual WAN)
-      - name: identity-landing-zone
+      - name: identity
         display_name: Identity Landing Zone
 
 trigger:
@@ -218,7 +218,7 @@ stages:
                   script: |
                     eirctl build
                 env:
-                  TF_FILE_LOCATION: "src/${{ module.name }}"
+                  TF_FILE_LOCATION: "src/${{ module.name }}/deploy/terraform"
                   TF_MODULE_NAME: ${{ module.name }}
                   ADOC_INDEX_FILE: "docs/readme/${{ module.name }}/index.adoc"
 

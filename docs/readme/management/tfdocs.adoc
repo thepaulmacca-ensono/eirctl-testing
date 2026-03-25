@@ -1,0 +1,39 @@
+<!-- BEGIN_TF_DOCS -->
+== Requirements
+
+[cols="a,a",options="header,autowidth"]
+|===
+|Name |Version
+|[[requirement_terraform]] <<requirement_terraform,terraform>> |~> 1.12
+|[[requirement_azurerm]] <<requirement_azurerm,azurerm>> |~> 4.1.0
+|===
+
+== Providers
+
+[cols="a,a",options="header,autowidth"]
+|===
+|Name |Version
+|[[provider_azurerm]] <<provider_azurerm,azurerm>> |~> 4.1.0
+|===
+
+== Modules
+
+No modules.
+
+== Resources
+
+[cols="a,a",options="header,autowidth"]
+|===
+|Name |Type
+|https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace[azurerm_log_analytics_workspace.management] |resource
+|https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group[azurerm_resource_group.management] |resource
+|===
+
+== Inputs
+
+No inputs.
+
+== Outputs
+
+No outputs.
+<!-- END_TF_DOCS -->

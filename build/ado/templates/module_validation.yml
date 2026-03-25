@@ -13,7 +13,7 @@ jobs:
     displayName: "Validate ${{ parameters.display_name }} Module"
     condition: eq(variables['${{ parameters.module_changed }}'], 'true')
     variables:
-      TF_FILE_LOCATION: "src/${{ parameters.module_name }}"
+      TF_FILE_LOCATION: "src/${{ parameters.module_name }}/deploy/terraform"
     steps:
       - template: setup.yml
         parameters:

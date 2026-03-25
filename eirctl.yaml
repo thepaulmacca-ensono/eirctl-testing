@@ -11,8 +11,10 @@ pipelines:
       depends_on: terraform:docs:asciidoc
     - task: docs:markdown
       depends_on: docs:docbook
-    - task: build:copy
+    - task: terraform:docs:readme
       depends_on: docs:markdown
+    - task: build:copy
+      depends_on: terraform:docs:readme
     - task: build:package
       depends_on: build:copy
 

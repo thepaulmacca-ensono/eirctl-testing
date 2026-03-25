@@ -200,11 +200,35 @@ tasks:
         exit 1
       }
 
-      $moduleName = Split-Path $env:TF_FILE_LOCATION -Leaf
+      $moduleName = $env:TF_MODULE_NAME
       $outputFile = "$PWD/docs/readme/$moduleName/tfdocs.adoc"
 
       terraform-docs -c .terraform-docs.yml --output-file $outputFile $env:TF_FILE_LOCATION
       exit $LASTEXITCODE
+    required:
+      env:
+        - TF_FILE_LOCATION
+        - TF_MODULE_NAME
+
+  terraform:docs:readme:
+    context: powershell
+    description: |
+      Copy the comprehensive generated README to the module source directory
+
+      Runs after docs:markdown to update src/<module>/README.md with the full
+      AsciiDoc-generated content including terraform-docs tables
+    command: |
+      $source = "outputs/module/README.md"
+      $moduleRoot = Split-Path (Split-Path $env:TF_FILE_LOCATION -Parent) -Parent
+      $destination = Join-Path $moduleRoot "README.md"
+
+      if (-not (Test-Path $source)) {
+        Write-Error "Generated README not found at $source"
+        exit 1
+      }
+
+      Copy-Item -Path $source -Destination $destination -Force
+      Write-Output "Copied README to $destination"
     required:
       env:
         - TF_FILE_LOCATION
@@ -289,8 +313,22 @@ tasks:
     context: asciidoc
     description: Convert the Docbook README to Markdown
     command: |
-      pandoc -f docbook -t gfm -o outputs/module/README.md outputs/tmp/README.xml
+      New-Item -ItemType Directory -Path outputs/module -Force | Out-Null
+      $xmlContent = Get-Content outputs/tmp/README.xml -Raw
+      $title = $null
+      if ($xmlContent -match '<info>\s*<title>([^<]+)</title>') {
+        $title = $Matches[1]
+      }
+      pandoc -f docbook -t gfm --shift-heading-level-by=1 -o outputs/module/README.md outputs/tmp/README.xml
       if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      if ($title) {
+        $content = Get-Content outputs/module/README.md -Raw
+        Set-Content outputs/module/README.md -Value "# $title`n`n$content" -NoNewline
+      }
+      $readme = Get-Content outputs/module/README.md -Raw
+      $readme = $readme -replace '\\<!-- BEGIN_TF_DOCS -→[^\n]*', '<!-- BEGIN_TF_DOCS -->'
+      $readme = $readme -replace '[^\n]*\\<!-- END_TF_DOCS -→', '<!-- END_TF_DOCS -->'
+      Set-Content outputs/module/README.md -Value $readme -NoNewline
       Remove-Item -Path outputs/tmp -Recurse -Force
 
   docs:generate:
@@ -315,9 +353,17 @@ tasks:
 
   build:copy:
     context: powershell
-    description: Copy Terraform module into outputs/module folder
+    description: Copy module files into outputs/module folder
     command: |
-      Copy-Item -Path ${env:TF_FILE_LOCATION}/* -Destination outputs/module/ -Recurse -Force -Exclude tests,.terraform,.terraform.lock.hcl -ErrorAction Stop
+      $moduleRoot = Split-Path (Split-Path $env:TF_FILE_LOCATION -Parent) -Parent
+      Copy-Item -Path "$moduleRoot/*" -Destination "outputs/module/" -Recurse -Force -ErrorAction Stop
+      @(
+        "outputs/module/deploy/terraform/tests",
+        "outputs/module/deploy/terraform/.terraform",
+        "outputs/module/deploy/terraform/.terraform.lock.hcl"
+      ) | Where-Object { Test-Path $_ } | ForEach-Object {
+        Remove-Item -Path $_ -Recurse -Force
+      }
     required:
       env:
         - TF_FILE_LOCATION
@@ -343,7 +389,11 @@ tasks:
 
       $zipPath = ("outputs/{0}-{1}.zip" -f $env:TF_MODULE_NAME, $buildNumber)
       Write-Host ("Creating package: {0}" -f $zipPath)
-      Compress-Archive -Path outputs/module/* -DestinationPath $zipPath -Force -ErrorAction Stop
+      $sourceDir = (Resolve-Path "outputs/module").Path
+      $destPath = (Join-Path (Resolve-Path "outputs").Path ("{0}-{1}.zip" -f $env:TF_MODULE_NAME, $buildNumber))
+      Add-Type -AssemblyName System.IO.Compression.FileSystem
+      if (Test-Path $destPath) { Remove-Item $destPath -Force }
+      [System.IO.Compression.ZipFile]::CreateFromDirectory($sourceDir, $destPath)
       Remove-Item -Path outputs/module -Recurse -Force
     required:
       env:
