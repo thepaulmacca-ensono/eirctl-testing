@@ -1,3 +1,0 @@
-=== Region Selection
-
-Deploy identity resources in the same region as your primary connectivity hub. For multi-region deployments, deploy domain controllers in each region and configure AD Sites and Services for efficient replication.

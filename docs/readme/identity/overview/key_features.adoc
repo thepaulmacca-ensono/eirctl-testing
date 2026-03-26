@@ -1,7 +1,0 @@
-=== Key Features
-
-* *Identity Virtual Network* — Dedicated VNet (`10.1.0.0/16`) for identity workloads
-* *Domain Controllers Subnet* — Isolated subnet (`10.1.1.0/24`) with dedicated NSG for ADDS domain controllers
-* *AAD Connect Subnet* — Isolated subnet (`10.1.2.0/24`) with dedicated NSG for Entra Connect servers
-* *Network Security Groups* — Pre-configured NSGs on both identity subnets for traffic control
-* *Peering Ready* — Designed to peer with the connectivity hub for cross-network identity access

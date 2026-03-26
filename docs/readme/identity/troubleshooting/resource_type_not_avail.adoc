@@ -1,3 +1,0 @@
-=== Subnet Delegation Conflicts
-
-If deploying managed services (e.g., Entra Domain Services) into identity subnets, check that no conflicting subnet delegations exist. Some services require exclusive subnet delegation.

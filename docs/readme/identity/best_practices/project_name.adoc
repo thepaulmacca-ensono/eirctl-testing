@@ -1,3 +1,0 @@
-=== Hybrid Identity
-
-When using Microsoft Entra Connect, deploy it in the dedicated AAD Connect subnet. Ensure the server has connectivity to both on-premises AD and Microsoft Entra ID endpoints.

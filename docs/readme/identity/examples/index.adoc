@@ -1,7 +1,0 @@
-== Examples
-
-include::single_web_app.adoc[]
-
-include::multi-tier_app.adoc[]
-
-include::multi_region_deployment.adoc[]

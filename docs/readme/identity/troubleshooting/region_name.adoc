@@ -1,7 +1,0 @@
-=== VNet Peering Connectivity
-
-If identity services are unreachable from spoke VNets, verify that:
-
-* VNet peering is established between identity and hub VNets
-* `AllowForwardedTraffic` is enabled on the peering
-* NSG rules permit traffic from spoke address ranges

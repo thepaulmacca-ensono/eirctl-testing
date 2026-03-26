@@ -1,7 +1,0 @@
-=== Purpose
-
-* Provide a dedicated network for identity services in Azure Landing Zones
-* Deploy subnets for Active Directory Domain Services (ADDS) domain controllers
-* Provision a subnet for Microsoft Entra Connect (Azure AD Connect) servers
-* Enforce network isolation for identity workloads using Network Security Groups
-* Support hybrid identity between on-premises Active Directory and Microsoft Entra ID
