@@ -17,7 +17,7 @@ provider "azurerm" {
 
 # Identity resource group
 resource "azurerm_resource_group" "identity" {
-  name     = "rg-identity-landing-zone"
+  name     = var.resource_group_name
   location = "uksouth"
 }
 

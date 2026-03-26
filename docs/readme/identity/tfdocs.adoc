@@ -1,2 +1,58 @@
 <!-- BEGIN_TF_DOCS -->
+== Requirements
+
+[cols="a,a",options="header,autowidth"]
+|===
+|Name |Version
+|[[requirement_terraform]] <<requirement_terraform,terraform>> |~> 1.12
+|[[requirement_azurerm]] <<requirement_azurerm,azurerm>> |~> 4.1.0
+|===
+
+== Providers
+
+[cols="a,a",options="header,autowidth"]
+|===
+|Name |Version
+|[[provider_azurerm]] <<provider_azurerm,azurerm>> |~> 4.1.0
+|===
+
+== Modules
+
+No modules.
+
+== Resources
+
+[cols="a,a",options="header,autowidth"]
+|===
+|Name |Type
+|https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_group[azurerm_network_security_group.aad_connect] |resource
+|https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_group[azurerm_network_security_group.domain_controllers] |resource
+|https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group[azurerm_resource_group.identity] |resource
+|https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet[azurerm_subnet.aad_connect] |resource
+|https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet[azurerm_subnet.domain_controllers] |resource
+|https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet_network_security_group_association[azurerm_subnet_network_security_group_association.aad_connect] |resource
+|https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet_network_security_group_association[azurerm_subnet_network_security_group_association.domain_controllers] |resource
+|https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network[azurerm_virtual_network.identity] |resource
+|===
+
+== Inputs
+
+[cols="a,a,a,a,a",options="header,autowidth"]
+|===
+|Name |Description |Type |Default |Required
+|[[input_resource_group_name]] <<input_resource_group_name,resource_group_name>>
+|Name of the resource group to create
+|`string`
+|n/a
+|yes
+
+|===
+
+== Outputs
+
+[cols="a,a",options="header,autowidth"]
+|===
+|Name |Description
+|[[output_resource_group_name]] <<output_resource_group_name,resource_group_name>> |Name of the resource group created for the Identity landing zone
+|===
 <!-- END_TF_DOCS -->

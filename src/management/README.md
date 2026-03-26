@@ -344,17 +344,18 @@ module "management_eu" {
 ## API Reference
 
 <!-- BEGIN_TF_DOCS -->
+## Requirements
 
 | Name                                                                         | Version   |
 |------------------------------------------------------------------------------|-----------|
-| <span id="requirement_terraform"></span> [terraform](#requirement_terraform) | ~\> 1.12  |
-| <span id="requirement_azurerm"></span> [azurerm](#requirement_azurerm)       | ~\> 4.1.0 |
+| <span id="requirement_terraform"></span> [terraform](#requirement_terraform) | ~> 1.12  |
+| <span id="requirement_azurerm"></span> [azurerm](#requirement_azurerm)       | ~> 4.1.0 |
 
 ## Providers
 
 | Name                                                             | Version   |
 |------------------------------------------------------------------|-----------|
-| <span id="provider_azurerm"></span> [azurerm](#provider_azurerm) | ~\> 4.1.0 |
+| <span id="provider_azurerm"></span> [azurerm](#provider_azurerm) | ~> 4.1.0 |
 
 ## Modules
 
@@ -369,9 +370,15 @@ No modules.
 
 ## Inputs
 
-No inputs.
+| Name                                                                                           | Description                          | Type     | Default | Required |
+|------------------------------------------------------------------------------------------------|--------------------------------------|----------|---------|----------|
+| <span id="input_resource_group_name"></span> [resource_group_name](#input_resource_group_name) | Name of the resource group to create | `string` | n/a     | yes      |
 
 ## Outputs
+
+| Name                                                                                             | Description                                                        |
+|--------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|
+| <span id="output_resource_group_name"></span> [resource_group_name](#output_resource_group_name) | Name of the resource group created for the Management landing zone |
 
 <!-- END_TF_DOCS -->
 

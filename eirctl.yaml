@@ -4,19 +4,19 @@ import:
 
 pipelines:
   build:
-    - task: build:clean
+    - task: terraform:build:clean
     - task: terraform:docs:asciidoc
-      depends_on: build:clean
+      depends_on: terraform:build:clean
     - task: docs:docbook
       depends_on: terraform:docs:asciidoc
     - task: docs:markdown
       depends_on: docs:docbook
-    - task: terraform:docs:readme
+    - task: terraform:docs:asciidoc:readme
       depends_on: docs:markdown
-    - task: build:copy
-      depends_on: terraform:docs:readme
-    - task: build:package
-      depends_on: build:copy
+    - task: terraform:build:copy
+      depends_on: terraform:docs:asciidoc:readme
+    - task: terraform:build:package
+      depends_on: terraform:build:copy
 
   docs:
     - task: docs:generate

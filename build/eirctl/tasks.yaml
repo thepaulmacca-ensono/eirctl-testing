@@ -210,16 +210,25 @@ tasks:
         - TF_FILE_LOCATION
         - TF_MODULE_NAME
 
-  terraform:docs:readme:
+  terraform:docs:asciidoc:readme:
     context: powershell
     description: |
-      Copy the comprehensive generated README to the module source directory
+      Copy the AsciiDoc-generated README to the module source directory
 
       Runs after docs:markdown to update src/<module>/README.md with the full
       AsciiDoc-generated content including terraform-docs tables
+
+      Supports two module layouts:
+        - Nested: src/<module>/deploy/terraform/ (TF_FILE_LOCATION points to deploy/terraform)
+        - Flat:   src/<module>/ (TF_FILE_LOCATION points to the module root with .tf files)
     command: |
       $source = "outputs/module/README.md"
-      $moduleRoot = Split-Path (Split-Path $env:TF_FILE_LOCATION -Parent) -Parent
+      $tfPath = $env:TF_FILE_LOCATION.TrimEnd('/\')
+      if ($tfPath -match '[/\\]deploy[/\\]terraform$') {
+        $moduleRoot = Split-Path (Split-Path $tfPath -Parent) -Parent
+      } else {
+        $moduleRoot = $tfPath
+      }
       $destination = Join-Path $moduleRoot "README.md"
 
       if (-not (Test-Path $source)) {
@@ -228,7 +237,7 @@ tasks:
       }
 
       Copy-Item -Path $source -Destination $destination -Force
-      Write-Output "Copied README to $destination"
+      Write-Host "Copied AsciiDoc-generated README to $destination"
     required:
       env:
         - TF_FILE_LOCATION
@@ -296,7 +305,7 @@ tasks:
       Convert AsciiDoc documentation to Docbook for conversion to Markdown
 
       Set ADOC_INDEX_FILE to the path of the AsciiDoc index file
-      (e.g., docs/readme/index.adoc or docs/readme/<module_name>/index.adoc)
+      (e.g., docs/readme/index.adoc or docs/readme/<module>/index.adoc)
     command: |
       if (-not (Test-Path "docs/readme")) {
         Write-Error "docs/readme directory not found"
@@ -326,8 +335,10 @@ tasks:
         Set-Content outputs/module/README.md -Value "# $title`n`n$content" -NoNewline
       }
       $readme = Get-Content outputs/module/README.md -Raw
-      $readme = $readme -replace '\\<!-- BEGIN_TF_DOCS -→[^\n]*', '<!-- BEGIN_TF_DOCS -->'
-      $readme = $readme -replace '[^\n]*\\<!-- END_TF_DOCS -→', '<!-- END_TF_DOCS -->'
+      $readme = $readme -replace '\\<!-- BEGIN_TF_DOCS [^\n]*={1,}\s*(\w[^\n]*)', "<!-- BEGIN_TF_DOCS -->`n## `$1"
+      $readme = $readme -replace '\\<!-- BEGIN_TF_DOCS [^\n]*', '<!-- BEGIN_TF_DOCS -->'
+      $readme = $readme -replace '[^\n]*\\<!-- END_TF_DOCS [^\n]*', '<!-- END_TF_DOCS -->'
+      $readme = $readme -replace '~\\>', '~>'
       Set-Content outputs/module/README.md -Value $readme -NoNewline
       Remove-Item -Path outputs/tmp -Recurse -Force
 
@@ -343,24 +354,37 @@ tasks:
       Build-Documentation -Config $configPath
       if (-not $?) { exit 1 }
 
-  # Build
-  build:clean:
+  # Module Zip File Build/Package
+  terraform:build:clean:
     context: powershell
     description: Clean outputs folder
     command: |
       Remove-Item -Path outputs -Recurse -Force -ErrorAction SilentlyContinue
       New-Item -ItemType Directory -Path outputs/module -Force | Out-Null
 
-  build:copy:
+  terraform:build:copy:
     context: powershell
-    description: Copy module files into outputs/module folder
+    description: |
+      Copy module files into outputs/module folder
+
+      Supports two module layouts:
+        - Nested: src/<module>/deploy/terraform/ (TF_FILE_LOCATION points to deploy/terraform)
+        - Flat:   src/<module>/ (TF_FILE_LOCATION points to the module root with .tf files)
     command: |
-      $moduleRoot = Split-Path (Split-Path $env:TF_FILE_LOCATION -Parent) -Parent
+      $tfPath = $env:TF_FILE_LOCATION.TrimEnd('/\')
+      if ($tfPath -match '[/\\]deploy[/\\]terraform$') {
+        $moduleRoot = Split-Path (Split-Path $tfPath -Parent) -Parent
+      } else {
+        $moduleRoot = $tfPath
+      }
       Copy-Item -Path "$moduleRoot/*" -Destination "outputs/module/" -Recurse -Force -ErrorAction Stop
       @(
         "outputs/module/deploy/terraform/tests",
         "outputs/module/deploy/terraform/.terraform",
-        "outputs/module/deploy/terraform/.terraform.lock.hcl"
+        "outputs/module/deploy/terraform/.terraform.lock.hcl",
+        "outputs/module/tests",
+        "outputs/module/.terraform",
+        "outputs/module/.terraform.lock.hcl"
       ) | Where-Object { Test-Path $_ } | ForEach-Object {
         Remove-Item -Path $_ -Recurse -Force
       }
@@ -368,7 +392,7 @@ tasks:
       env:
         - TF_FILE_LOCATION
 
-  build:package:
+  terraform:build:package:
     context: powershell
     description: |
       Create zip package for Terraform module
@@ -407,7 +431,7 @@ tasks:
 
       Resolves version from BUILD_BUILDNUMBER (ADO) or GITHUB_RUN_NUMBER (GHA)
       Resolves commit SHA from BUILD_SOURCEVERSION (ADO) or GITHUB_SHA (GHA)
-      Authenticates using ADO_ACCESS_TOKEN/SYSTEM_ACCESSTOKEN for Azure Repos
+      Authenticates using ADO_ACCESS_TOKEN/SYSTEM_ACCESSTOKEN for Azure DevOps
       or GITHUB_TOKEN for GitHub
     command: |
       git config --global --add safe.directory /eirctl
