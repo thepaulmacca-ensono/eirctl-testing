@@ -17,13 +17,15 @@ watchers:
 
 # Local Tasks
 tasks:
-  terraform:docs:readme:
+  terraform:docs:
     context: infra
     description: |
       Update the API Reference section in README.md using terraform-docs
 
       Runs terraform-docs to inject markdown documentation between
       <!-- BEGIN_TF_DOCS --> and <!-- END_TF_DOCS --> markers in the README
+
+      Uses .terraform-docs.yml for consistent configuration (markdown format)
     command: |
       $readmePath = Join-Path $PWD "README.md"
 
@@ -32,7 +34,7 @@ tasks:
         exit 1
       }
 
-      terraform-docs markdown table --output-file $readmePath --output-mode inject deploy/terraform
+      terraform-docs -c .terraform-docs.yml --output-file $readmePath deploy/terraform
       exit $LASTEXITCODE
 
 pipelines:
@@ -49,7 +51,7 @@ pipelines:
     - task: scan:terraform:checkov
 
   docs:
-    - task: terraform:docs:readme
+    - task: terraform:docs
 
   infrastructure:plan:
     - task: terraform:init

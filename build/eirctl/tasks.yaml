@@ -379,7 +379,6 @@ tasks:
       }
       Copy-Item -Path "$moduleRoot/*" -Destination "outputs/module/" -Recurse -Force -ErrorAction Stop
       @(
-        "outputs/module/deploy/terraform/tests",
         "outputs/module/deploy/terraform/.terraform",
         "outputs/module/deploy/terraform/.terraform.lock.hcl",
         "outputs/module/tests",
@@ -387,6 +386,11 @@ tasks:
         "outputs/module/.terraform.lock.hcl"
       ) | Where-Object { Test-Path $_ } | ForEach-Object {
         Remove-Item -Path $_ -Recurse -Force
+      }
+      @(
+        "*.env"
+      ) | ForEach-Object {
+        Get-ChildItem -Path "outputs/module" -Filter $_ -Recurse | Remove-Item -Force
       }
     required:
       env:

@@ -1,4 +1,49 @@
+# Pre-commit hooks for Ensono Stacks Management Module
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
 repos:
+  # YAML linting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        args:
+          - -c
+          - yamllint.conf
+
+  # Terraform formatting and validation
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.105.0
+    hooks:
+      - id: terraform_fmt
+        args:
+          - --args=-diff
+          - --args=-recursive
+        stages: [pre-commit]
+      - id: terraform_validate
+        args:
+          - --hook-config=--retry-once-with-cleanup=true
+        stages: [pre-commit]
+      - id: terraform_tflint
+        exclude: ^deploy/terraform/examples
+        stages: [pre-commit]
+      - id: terraform_docs
+        args:
+          - --args=--config=.terraform-docs.yml
+        stages: [pre-commit]
+
+  # Terraform static analysis scanning
+  - repo: https://github.com/bridgecrewio/checkov.git
+    rev: '3.2.511'
+    hooks:
+      - id: checkov_diff
+        language_version: python3.12
+        args:
+          - '-f'
+        stages: [pre-commit]
+
+  # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -12,11 +57,8 @@ repos:
       - id: mixed-line-ending
         stages: [pre-commit]
         args: [--fix=lf]
-  - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.105.0
-    hooks:
-      - id: terraform_fmt
-        stages: [pre-commit]
+
+  # Commit messaging
   - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
     rev: v9.24.0
     hooks:
