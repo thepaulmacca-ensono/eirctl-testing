@@ -1,11 +1,15 @@
 mock_provider "azurerm" {}
 
+variables {
+  resource_group_name = "rg-management"
+}
+
 run "management_resource_group" {
   command = plan
 
   assert {
-    condition     = azurerm_resource_group.management.name == "rg-management"
-    error_message = "Resource group name must be 'rg-management'"
+    condition     = azurerm_resource_group.management.name == var.resource_group_name
+    error_message = "Resource group name must be '${var.resource_group_name}'"
   }
 
   assert {

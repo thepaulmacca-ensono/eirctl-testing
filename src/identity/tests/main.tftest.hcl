@@ -1,11 +1,15 @@
 mock_provider "azurerm" {}
 
+variables {
+  resource_group_name = "rg-management"
+}
+
 run "identity_resource_group" {
   command = plan
 
   assert {
-    condition     = azurerm_resource_group.identity.name == "rg-identity-landing-zone"
-    error_message = "Resource group name must be 'rg-identity-landing-zone'"
+    condition     = azurerm_resource_group.identity.name == var.resource_group_name
+    error_message = "Resource group name must be '${var.resource_group_name}'"
   }
 
   assert {
