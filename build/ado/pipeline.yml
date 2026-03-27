@@ -109,7 +109,19 @@ stages:
                 if [[ "$(Build.Reason)" == "PullRequest" ]]; then
                   BASE_SHA="origin/$(System.PullRequest.TargetBranch)"
                 else
-                  BASE_SHA="HEAD~1"
+                  # Query the last successful CI build to diff against, ensuring no commits are missed
+                  # between pipeline runs (e.g. when multiple PRs merge before the pipeline processes them)
+                  LAST_SUCCESS_SHA=$(curl -s -H "Authorization: Bearer $(System.AccessToken)" \
+                    "$(System.CollectionUri)$(System.TeamProject)/_apis/build/builds?definitions=$(System.DefinitionId)&resultFilter=succeeded&statusFilter=completed&branchName=refs/heads/main&\$top=1&api-version=7.1" \
+                    | jq -r '.value[0].sourceVersion // empty')
+
+                  if [[ -n "$LAST_SUCCESS_SHA" ]] && git cat-file -e "$LAST_SUCCESS_SHA" 2>/dev/null; then
+                    echo "Using last successful build commit: $LAST_SUCCESS_SHA"
+                    BASE_SHA="$LAST_SUCCESS_SHA"
+                  else
+                    echo "Could not determine last successful build commit, falling back to HEAD~1"
+                    BASE_SHA="HEAD~1"
+                  fi
                 fi
 
                 echo "Diff base: $BASE_SHA"
@@ -227,12 +239,6 @@ stages:
                   targetPath: $(Build.SourcesDirectory)/outputs
                   artifact: ${{ module.name }}
 
-              # - task: PublishPipelineArtifact@1
-              #   displayName: Publish README file
-              #   inputs:
-              #     targetPath: $(Build.SourcesDirectory)/outputs/module/README.md
-              #     artifact: readme
-
   - stage: Release
     dependsOn:
       - Preliminaries
@@ -261,15 +267,11 @@ stages:
               - task: DownloadPipelineArtifact@2
                 displayName: "Download ${{ module.display_name }} Module Artifact"
                 condition: eq(variables['${{ replace(module.name, '-', '_') }}_changed'], 'true')
+                continueOnError: true
                 inputs:
                   artifact: ${{ module.name }}
                   patterns: "**/*.zip"
                   path: $(Build.SourcesDirectory)/outputs/assets
-
-          # - task: DownloadPipelineArtifact@2
-          #   inputs:
-          #     artifact: readme
-          #     path: $(Build.SourcesDirectory)/outputs/assets
 
           - template: templates/setup.yml
             parameters:
