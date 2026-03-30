@@ -35,9 +35,6 @@ pr:
   branches:
     include:
       - main
-  paths:
-    include:
-      - src/*
 
 pool:
   vmImage: $(pool_vm_image)
@@ -139,7 +136,7 @@ stages:
           - ${{ each module in parameters.modules }}:
               - task: Bash@3
                 name: check_${{ replace(module.name, '-', '_') }}
-                displayName: "Check changes for ${{ module.display_name }}"
+                displayName: "Check Changes for ${{ module.display_name }}"
                 inputs:
                   targetType: inline
                   script: |
@@ -159,7 +156,7 @@ stages:
 
   - stage: Validate
     displayName: Validate Modules
-    condition: eq(variables['Build.Reason'], 'PullRequest')
+    condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(${{ parameters.pre_release }}, true))
     dependsOn:
       - Preliminaries
     variables:
