@@ -1,6 +1,12 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Ensono/eirctl/refs/heads/main/schemas/schema_v1.json
+
+# Import remote contexts and tasks for eirctl
 import:
-  - ./build/eirctl/contexts.yaml
-  - ./build/eirctl/tasks.yaml
+  - git::ssh://git@github.com/thepaulmacca-ensono/eirctl-shared-scripts.git//shared/contexts/eirctl.yaml
+  - git::ssh://git@github.com/thepaulmacca-ensono/eirctl-shared-scripts.git//shared/security/eirctl.yaml
+  - git::ssh://git@github.com/thepaulmacca-ensono/eirctl-shared-scripts.git//shared/docs/eirctl.yaml
+  - git::ssh://git@github.com/thepaulmacca-ensono/eirctl-shared-scripts.git//shared/infra/terraform.yaml
+  - git::ssh://git@github.com/thepaulmacca-ensono/eirctl-shared-scripts.git//shared/github/eirctl.yaml
 
 pipelines:
   build:
