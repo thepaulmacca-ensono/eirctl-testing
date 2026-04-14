@@ -103,6 +103,8 @@ stages:
             inputs:
               targetType: inline
               script: |
+                set -euo pipefail
+
                 if [[ "$(Build.Reason)" == "PullRequest" ]]; then
                   BASE_SHA="origin/$(System.PullRequest.TargetBranch)"
                 else
@@ -140,6 +142,8 @@ stages:
                 inputs:
                   targetType: inline
                   script: |
+                    set -euo pipefail
+
                     BASE_SHA="$(diff_base.BASE_SHA)"
                     CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD 2>/dev/null || echo "")
 
@@ -206,8 +210,6 @@ stages:
     dependsOn:
       - Preliminaries
       - Validate
-      - ${{ if eq(parameters.generate_documentation, true) }}:
-          - Documentation
     variables:
       ${{ each module in parameters.modules }}:
         ${{ replace(module.name, '-', '_') }}_changed: $[ stageDependencies.Preliminaries.Detect_Changes.outputs['check_${{ replace(module.name, '-', '_') }}.changed'] ]
