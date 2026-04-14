@@ -179,7 +179,7 @@ stages:
       - stage: Documentation
         dependsOn:
           - Validate
-        condition: not(failed('Validate'))
+        condition: and(not(failed('Validate')), not(canceled()))
         jobs:
           - job: Generate_Documentation
             displayName: Generate Documentation
@@ -206,7 +206,7 @@ stages:
 
   - stage: Build
     displayName: Build Modules
-    condition: not(failed('Validate'))
+    condition: and(not(failed('Validate')), not(canceled()))
     dependsOn:
       - Preliminaries
       - Validate
@@ -243,7 +243,7 @@ stages:
       - Build
       - ${{ if eq(parameters.generate_documentation, true) }}:
           - Documentation
-    condition: and(not(failed()), or(eq(variables['is_main'], 'true'), eq(${{ parameters.pre_release }}, true)))
+    condition: and(not(failed()), not(canceled()), or(eq(variables['is_main'], 'true'), eq(${{ parameters.pre_release }}, true)))
     variables:
       - group: github-creds
     jobs:
