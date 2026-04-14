@@ -210,14 +210,10 @@ stages:
     dependsOn:
       - Preliminaries
       - Validate
-    variables:
-      ${{ each module in parameters.modules }}:
-        ${{ replace(module.name, '-', '_') }}_changed: $[ stageDependencies.Preliminaries.Detect_Changes.outputs['check_${{ replace(module.name, '-', '_') }}.changed'] ]
     jobs:
       - ${{ each module in parameters.modules }}:
           - job: Build_${{ replace(module.name, '-', '_') }}
             displayName: "Build ${{ module.display_name }}"
-            condition: eq(variables['${{ replace(module.name, '-', '_') }}_changed'], 'true')
             steps:
               - template: templates/setup.yml
                 parameters:
@@ -250,9 +246,6 @@ stages:
     condition: and(not(failed()), or(eq(variables['is_main'], 'true'), eq(${{ parameters.pre_release }}, true)))
     variables:
       - group: github-creds
-      - ${{ each module in parameters.modules }}:
-          - name: ${{ replace(module.name, '-', '_') }}_changed
-            value: $[ stageDependencies.Preliminaries.Detect_Changes.outputs['check_${{ replace(module.name, '-', '_') }}.changed'] ]
     jobs:
       - job: Create_GitHub_Release
         displayName: Create GitHub Release
@@ -268,8 +261,6 @@ stages:
           - ${{ each module in parameters.modules }}:
               - task: DownloadPipelineArtifact@2
                 displayName: "Download ${{ module.display_name }} Module Artifact"
-                condition: eq(variables['${{ replace(module.name, '-', '_') }}_changed'], 'true')
-                continueOnError: true
                 inputs:
                   artifact: ${{ module.name }}
                   patterns: "**/*.zip"
