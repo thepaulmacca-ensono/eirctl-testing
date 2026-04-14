@@ -1,0 +1,46 @@
+framework:
+  name: terraform
+  commands:
+    - name: terraform
+      version: ">= 1.12"
+    - name: eirctl
+      version: ">= 0.9"
+
+init:
+  operations:
+    - action: cmd
+      command: pwsh
+      arguments: >-
+        -Command "Copy-Item -Path './src/management/*'
+        -Destination '{{ .Project.Directory.WorkingDir }}/'
+        -Recurse -Force"
+      description: Import management landing zone module
+      tags:
+        - management
+
+    - action: cmd
+      command: pwsh
+      arguments: >-
+        -Command "Copy-Item -Path './src/connectivity-hub-spoke/*'
+        -Destination '{{ .Project.Directory.WorkingDir }}/'
+        -Recurse -Force"
+      description: Import connectivity hub-spoke landing zone module
+      tags:
+        - connectivity-hub-spoke
+
+    - action: cmd
+      command: pwsh
+      arguments: >-
+        -Command "Copy-Item -Path './src/connectivity-virtual-wan/*'
+        -Destination '{{ .Project.Directory.WorkingDir }}/'
+        -Recurse -Force"
+      description: Import connectivity virtual-wan landing zone module
+      tags:
+        - connectivity-virtual-wan
+
+setup:
+  operations:
+    - action: cmd
+      command: eirctl
+      arguments: lint
+      description: Validate Terraform configuration
