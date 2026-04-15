@@ -1,0 +1,33 @@
+# Example stacks.yml for scaffolding an Azure Platform Management Landing Zone.
+#
+# Usage:
+#   stacks-cli scaffold -c stacks.yml --internalconfig internal_config.yml
+#
+# Change framework.option to one of: management, connectivity-hub-spoke, connectivity-virtual-wan.
+
+input:
+  business:
+    company: ensono
+    domain: platform
+    component: landing-zone
+  cloud:
+    platform: azure
+    region: uksouth
+  pipeline: azdo
+  project:
+    - name: management
+      framework:
+        type: infra
+        option: alz_management
+        version: v0.0.78
+      sourcecontrol:
+        type: github
+        url: https://github.com/thepaulmacca-ensono/management-landing-zone.git
+    - name: connectivity
+      framework:
+        type: infra
+        option: alz_connectivity_hub_spoke
+        version: v0.0.78
+      sourcecontrol:
+        type: github
+        url: https://github.com/thepaulmacca-ensono/connectivity-landing-zone.git
