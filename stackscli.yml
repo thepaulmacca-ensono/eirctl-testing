@@ -15,7 +15,7 @@ init:
         -Recurse -Force
       desc: Import Management Landing Zone module
       tags:
-        - management
+        - alz_management
 
     - action: cmd
       cmd: pwsh
@@ -26,7 +26,7 @@ init:
         -Recurse -Force
       desc: Import Connectivity Hub-Spoke Landing Zone module
       tags:
-        - connectivity-hub-spoke
+        - alz_connectivity_hub_spoke
 
     - action: cmd
       cmd: pwsh
@@ -37,7 +37,7 @@ init:
         -Recurse -Force
       desc: Import Connectivity Virtual-WAN Landing Zone module
       tags:
-        - connectivity-virtual-wan
+        - alz_connectivity_virtual_wan
 
 setup:
   operations:
