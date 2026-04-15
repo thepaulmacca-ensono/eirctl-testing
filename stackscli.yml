@@ -1,42 +1,41 @@
 framework:
-  name: terraform
+  name: infra
   commands:
     - name: terraform
       version: ">= 1.12"
-    - name: pwsh
-      version: ">= 7.1"
-    - name: eirctl
-      version: ">= 0.9"
 
 init:
   operations:
     - action: cmd
       cmd: pwsh
       args: >-
-        -Command "Copy-Item -Path './src/management/*'
-        -Destination '{{ .Project.Directory.WorkingDir }}/'
-        -Recurse -Force"
-      desc: Import management landing zone module
+        -Command Copy-Item
+        -Path ./src/management/*
+        -Destination {{ .Project.Directory.WorkingDir }}/
+        -Recurse -Force
+      desc: Import Management Landing Zone module
       tags:
         - management
 
     - action: cmd
       cmd: pwsh
       args: >-
-        -Command "Copy-Item -Path './src/connectivity-hub-spoke/*'
-        -Destination '{{ .Project.Directory.WorkingDir }}/'
-        -Recurse -Force"
-      desc: Import hub-spoke connectivity landing zone module
+        -Command Copy-Item
+        -Path ./src/connectivity-hub-spoke/*
+        -Destination {{ .Project.Directory.WorkingDir }}/
+        -Recurse -Force
+      desc: Import Connectivity Hub-Spoke Landing Zone module
       tags:
         - connectivity-hub-spoke
 
     - action: cmd
       cmd: pwsh
       args: >-
-        -Command "Copy-Item -Path './src/connectivity-virtual-wan/*'
-        -Destination '{{ .Project.Directory.WorkingDir }}/'
-        -Recurse -Force"
-      desc: Import virtual-wan connectivity landing zone module
+        -Command Copy-Item
+        -Path ./src/connectivity-virtual-wan/*
+        -Destination {{ .Project.Directory.WorkingDir }}/
+        -Recurse -Force
+      desc: Import Connectivity Virtual-WAN Landing Zone module
       tags:
         - connectivity-virtual-wan
 
