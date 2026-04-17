@@ -6,7 +6,8 @@
 # All components clone the same monorepo. The stackscli.yml at the repo root
 # uses tags to select which src/{module}/ gets copied based on framework.option.
 #
-# Update the version field to match the latest release tag.
+# The __VERSION__ placeholder is replaced automatically by the build pipeline
+# with the release tag (e.g. v0.0.79) — no manual updates needed.
 
 frameworks:
   - name: infra
@@ -21,23 +22,17 @@ stacks:
     infra_alz_management:
       group: infra
       name: alz_management
-      package:
+      package: &package
         url: https://github.com/thepaulmacca-ensono/eirctl-testing
         type: git
-        version: v0.0.78
+        version: __VERSION__
 
     infra_alz_connectivity_hub_spoke:
       group: infra
       name: alz_connectivity_hub_spoke
-      package:
-        url: https://github.com/thepaulmacca-ensono/eirctl-testing
-        type: git
-        version: v0.0.78
+      package: *package
 
     infra_alz_connectivity_virtual_wan:
       group: infra
       name: alz_connectivity_virtual_wan
-      package:
-        url: https://github.com/thepaulmacca-ensono/eirctl-testing
-        type: git
-        version: v0.0.78
+      package: *package

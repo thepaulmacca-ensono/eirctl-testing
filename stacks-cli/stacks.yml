@@ -4,6 +4,7 @@
 #   stacks-cli scaffold -c stacks.yml --internalconfig internal_config.yml
 #
 # Change framework.option to one of: management, connectivity-hub-spoke, connectivity-virtual-wan.
+# The __VERSION__ placeholder is replaced automatically by the build pipeline.
 
 input:
   business:
@@ -19,7 +20,7 @@ input:
       framework:
         type: infra
         option: alz_management
-        version: v0.0.78
+        version: __VERSION__
       sourcecontrol:
         type: github
         url: https://github.com/thepaulmacca-ensono/management-landing-zone.git
@@ -27,7 +28,7 @@ input:
       framework:
         type: infra
         option: alz_connectivity_hub_spoke
-        version: v0.0.78
+        version: __VERSION__
       sourcecontrol:
         type: github
         url: https://github.com/thepaulmacca-ensono/connectivity-landing-zone.git

@@ -250,6 +250,16 @@ stages:
       - job: Create_GitHub_Release
         displayName: Create GitHub Release
         steps:
+          - task: Bash@3
+            displayName: Stamp Version in Stacks CLI Files
+            inputs:
+              targetType: inline
+              script: |
+                set -euo pipefail
+                VERSION="v$(Build.BuildNumber)"
+                echo "Stamping version: $VERSION"
+                sed -i "s/__VERSION__/$VERSION/g" stacks-cli/internal_config.yml stacks-cli/stacks.yml
+
           - ${{ if eq(parameters.generate_documentation, true) }}:
               - task: DownloadPipelineArtifact@2
                 displayName: Download Repository Documentation Artifact
